@@ -7,7 +7,7 @@
 import { Entity, Family, Engine, EntitySystem } from "typed-ecstasy";
 import { SignalConnection } from "typed-signals";
 
-import { InputComponent, PositionComponent, VelocityComponent, PhysicsComponent } from "../Components";
+import { InputComponent, PositionComponent, VelocityComponent, PhysicsComponent } from "../components";
 import { GameEvents } from "../GameEvents";
 import { Vec2 } from "../Vec2";
 

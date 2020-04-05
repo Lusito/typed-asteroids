@@ -8,16 +8,14 @@ import { Sprite, Container } from "pixi.js";
 
 import { Item } from "../Item";
 import { Animation } from "../SceneAnimatorJSON";
-import {
-    SpriteEffect,
-    SpriteEffectFadeIn,
-    SpriteEffectFadeOut,
-    SpriteEffectScaleIn,
-    SpriteEffectScaleOut,
-    SpriteEffectHide,
-    SpriteEffectShow,
-} from "./SpriteEffects";
 import { getTexture } from "../../loader";
+import { SpriteEffectFadeIn } from "./effects/SpriteEffectFadeIn";
+import { SpriteEffectFadeOut } from "./effects/SpriteEffectFadeOut";
+import { SpriteEffectScaleIn } from "./effects/SpriteEffectScaleIn";
+import { SpriteEffectScaleOut } from "./effects/SpriteEffectScaleOut";
+import { SpriteEffectHide } from "./effects/SpriteEffectHide";
+import { SpriteEffectShow } from "./effects/SpriteEffectShow";
+import { SpriteEffect } from "./effects/SpriteEffect";
 
 const spriteEffectMap: { [s: string]: SpriteEffect } = {
     fade_in: new SpriteEffectFadeIn(),

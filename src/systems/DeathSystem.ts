@@ -17,7 +17,7 @@ import {
     ShieldComponent,
     VelocityComponent,
     SpriteComponent,
-} from "../Components";
+} from "../components";
 import { GameData } from "../GameData";
 import { getSound } from "../loader";
 

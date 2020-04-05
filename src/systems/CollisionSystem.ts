@@ -6,7 +6,7 @@
 
 import { Entity, Engine, Family, IteratingSystem } from "typed-ecstasy";
 
-import { PhysicsComponent, PositionComponent, ShieldComponent, PowerupComponent } from "../Components";
+import { PhysicsComponent, PositionComponent, ShieldComponent, PowerupComponent } from "../components";
 import { Vec2 } from "../Vec2";
 import { GameEvents } from "../GameEvents";
 

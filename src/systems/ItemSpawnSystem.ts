@@ -15,7 +15,7 @@ import {
     PositionComponent,
     PhysicsComponent,
     ShieldComponent,
-} from "../Components";
+} from "../components";
 import { GameData } from "../GameData";
 import { getSound } from "../loader";
 

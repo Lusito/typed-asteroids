@@ -7,7 +7,7 @@
 import { Entity, Family, IteratingSystem, Engine } from "typed-ecstasy";
 import { Key } from "ts-keycode-enum";
 
-import { InputComponent, PositionComponent, VelocityComponent, PlayerComponent } from "../Components";
+import { InputComponent, PositionComponent, VelocityComponent, PlayerComponent } from "../components";
 import { Vec2 } from "../Vec2";
 import { GameEvents } from "../GameEvents";
 

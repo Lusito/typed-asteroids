@@ -7,7 +7,7 @@
 import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
 
 import { GameEvents } from "../GameEvents";
-import { ShieldComponent } from "../Components";
+import { ShieldComponent } from "../components";
 
 export class ShieldSystem extends IteratingSystem {
     gameEvents: GameEvents | null = null;

@@ -16,7 +16,7 @@ import { InputSystem } from "../systems/InputSystem";
 import { MovementSystem } from "../systems/MovementSystem";
 import { ItemSpawnSystem } from "../systems/ItemSpawnSystem";
 import { PossibleComponentDefs } from "../PossibleComponentDefs";
-import { ComponentFactories, SoundsComponent, PowerupComponent } from "../Components";
+import { ComponentFactories, SoundsComponent, PowerupComponent } from "../components";
 import * as Blueprints from "../Blueprints";
 import { GameEvents } from "../GameEvents";
 import { ShootSystem } from "../systems/ShootSystem";
@@ -33,21 +33,21 @@ import { MenuManager } from "../menu/MenuManager";
 import { getSound, getTexture } from "../loader";
 
 export class GameState extends BaseState {
-    private menuManager: MenuManager;
+    private menuManager!: MenuManager;
 
     private gameEvents: GameEvents;
 
-    private hudSystem?: HudSystem;
+    private hudSystem!: HudSystem;
 
-    private itemSpawnSystem?: ItemSpawnSystem;
+    private itemSpawnSystem!: ItemSpawnSystem;
 
-    private inputSystem?: InputSystem;
+    private inputSystem!: InputSystem;
 
-    private entityFactory?: EntityFactory;
+    private entityFactory!: EntityFactory;
 
     private gameData: GameData;
 
-    private mainMenu: MainMenu;
+    private mainMenu!: MainMenu;
 
     private engine: Engine;
 
@@ -87,26 +87,7 @@ export class GameState extends BaseState {
         });
 
         // Main menu:
-        this.gameEvents.startGame.connect((forceRestart: boolean) => {
-            if (!this.gameData.playing || forceRestart) {
-                this.itemSpawnSystem!.restart();
-                this.hudSystem!.showCenterText("", 0);
-            }
-            this.menuManager.popAllPages();
-            this.hudSystem!.setVisible(true);
-        });
-        this.gameEvents.gameWon.connect(() => {
-            this.menuManager.popAllPages();
-            this.menuManager.pushPage(this.mainMenu);
-            this.hudSystem!.setVisible(false);
-            this.mainMenu.showCredits();
-        });
-        this.menuManager = new MenuManager(this.container);
-        this.mainMenu = new MainMenu(this.menuManager, this.gameEvents);
-        this.menuManager.emptyPop.connect(() => {
-            if (!this.gameData.playing) this.menuManager.pushPage(this.mainMenu);
-            else this.sounds.menu_close.play();
-        });
+        this.setupMainMenu();
 
         // Key Handling
         // fixme: addEventListener
@@ -117,9 +98,32 @@ export class GameState extends BaseState {
         this.showMenu(false);
     }
 
+    private setupMainMenu() {
+        this.gameEvents.startGame.connect((forceRestart: boolean) => {
+            if (!this.gameData.playing || forceRestart) {
+                this.itemSpawnSystem.restart();
+                this.hudSystem.showCenterText("", 0);
+            }
+            this.menuManager.popAllPages();
+            this.hudSystem.setVisible(true);
+        });
+        this.gameEvents.gameWon.connect(() => {
+            this.menuManager.popAllPages();
+            this.menuManager.pushPage(this.mainMenu);
+            this.hudSystem.setVisible(false);
+            this.mainMenu.showCredits();
+        });
+        this.menuManager = new MenuManager(this.container);
+        this.mainMenu = new MainMenu(this.menuManager, this.gameEvents);
+        this.menuManager.emptyPop.connect(() => {
+            if (!this.gameData.playing) this.menuManager.pushPage(this.mainMenu);
+            else this.sounds.menu_close.play();
+        });
+    }
+
     private onKeyUp(e: KeyboardEvent) {
         if (this.menuManager.isVisible()) this.menuManager.onKeyUp(e);
-        else if (e.keyCode !== Key.Escape) this.inputSystem!.onKeyUp(e);
+        else if (e.keyCode !== Key.Escape) this.inputSystem.onKeyUp(e);
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -127,15 +131,15 @@ export class GameState extends BaseState {
         else if (e.keyCode === Key.Escape) {
             this.showMenu();
         } else if (e.keyCode === Key.Enter && this.gameData.lifes === 0) this.gameEvents.startGame.emit(true);
-        else this.inputSystem!.onKeyDown(e);
+        else this.inputSystem.onKeyDown(e);
     }
 
     private showMenu(playSound = true) {
         if (playSound) this.sounds.menu_open.play();
 
-        if (this.gameData.lifes === 0) this.itemSpawnSystem!.stop();
+        if (this.gameData.lifes === 0) this.itemSpawnSystem.stop();
         this.menuManager.pushPage(this.mainMenu);
-        this.hudSystem!.setVisible(false);
+        this.hudSystem.setVisible(false);
     }
 
     private registerVisibleChange() {
@@ -183,7 +187,7 @@ export class GameState extends BaseState {
             }
             entityBlueprint.add(cb);
         }
-        this.entityFactory!.addEntityBlueprint(name, entityBlueprint);
+        this.entityFactory.addEntityBlueprint(name, entityBlueprint);
     }
 
     public update(deltaTime: number) {

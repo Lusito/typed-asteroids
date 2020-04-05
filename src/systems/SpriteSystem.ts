@@ -7,7 +7,7 @@
 import { Entity, Family, IteratingSystem, Engine } from "typed-ecstasy";
 import { Container } from "pixi.js";
 
-import { SpriteComponent, PositionComponent } from "../Components";
+import { SpriteComponent, PositionComponent } from "../components";
 import { DEG_TO_RAD } from "../Vec2";
 import { StateSpriteContainer } from "../StateSpriteContainer";
 import { GameEvents } from "../GameEvents";

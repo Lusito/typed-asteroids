@@ -6,7 +6,7 @@
 
 import { Entity, Family, IteratingSystem } from "typed-ecstasy";
 
-import { VelocityComponent, PositionComponent } from "../Components";
+import { VelocityComponent, PositionComponent } from "../components";
 
 export class MovementSystem extends IteratingSystem {
     constructor() {

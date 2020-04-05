@@ -7,7 +7,7 @@
 import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
 
 import { GameEvents } from "../GameEvents";
-import { LifeTimeComponent } from "../Components";
+import { LifeTimeComponent } from "../components";
 
 export class LifeTimeSystem extends IteratingSystem {
     gameEvents: GameEvents | null = null;

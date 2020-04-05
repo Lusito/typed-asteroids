@@ -9,16 +9,14 @@ import { Text, TextStyle, TextMetrics, Container } from "pixi.js";
 import { Item } from "../Item";
 import type { TextChar } from "./TextChar";
 import type { Animation } from "../SceneAnimatorJSON";
-import {
-    TextEffect,
-    TextEffectFadeIn,
-    TextEffectFadeOut,
-    TextEffectConstruct,
-    TextEffectType,
-    TextEffectTypeInstant,
-    TextEffectUntype,
-    TextEffectUntypeInstant,
-} from "./TextEffects";
+import { TextEffect } from "./effects/TextEffect";
+import { TextEffectFadeIn } from "./effects/TextEffectFadeIn";
+import { TextEffectFadeOut } from "./effects/TextEffectFadeOut";
+import { TextEffectConstruct } from "./effects/TextEffectConstruct";
+import { TextEffectType } from "./effects/TextEffectType";
+import { TextEffectTypeInstant } from "./effects/TextEffectTypeInstant";
+import { TextEffectUntype } from "./effects/TextEffectUntype";
+import { TextEffectUntypeInstant } from "./effects/TextEffectUntypeInstant";
 
 const textEffectMap: { [s: string]: TextEffect } = {
     fade_in: new TextEffectFadeIn(),
