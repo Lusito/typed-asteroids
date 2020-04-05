@@ -8,6 +8,7 @@ import { Vec2, DEG_TO_RAD } from "../Vec2";
 import { Path } from "./Path";
 import { Animation } from "./SceneAnimatorJson";
 import { Container } from "pixi.js";
+import { getSound } from "../loader";
 
 const temp = new Vec2();
 
@@ -114,9 +115,9 @@ export abstract class Item {
 
     public startAnimation(animation: Animation): boolean {
         if (animation.type === "sound") {
-            let sound = PIXI.loader.resources[animation.resource] as any;
-            if (sound && sound.sound)
-                sound.sound.play();
+            let sound = getSound(animation.resource);
+            if (sound)
+                sound.play();
             return true;
         }
         if (animation.type === "path") {

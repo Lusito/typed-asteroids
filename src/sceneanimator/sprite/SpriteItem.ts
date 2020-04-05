@@ -8,6 +8,7 @@ import { Item } from "../Item";
 import { Animation } from "../SceneAnimatorJson";
 import { Sprite, Container } from "pixi.js";
 import { SpriteEffect, SpriteEffectFadeIn, SpriteEffectFadeOut, SpriteEffectScaleIn, SpriteEffectScaleOut, SpriteEffectHide, SpriteEffectShow } from "./SpriteEffects";
+import { getTexture } from "../../loader";
 
 const spriteEffectMap: { [s: string]: SpriteEffect } = {
     fade_in: new SpriteEffectFadeIn(),
@@ -22,7 +23,7 @@ export class SpriteItem extends Item {
 
     protected angleAdd: number;
     public readonly scale: number;
-    protected sprite: Sprite | null;
+    protected sprite: Sprite | null = null;
     public effect: SpriteEffect | null = null;
 
     public constructor(parent: Container, type: string, group: string, scale: number, startTime: number, angle: number, oriented: boolean, opacity: number, resource: string) {
@@ -44,9 +45,9 @@ export class SpriteItem extends Item {
 
         // this.animation = null;
         if (type === 'sprite') {
-            let resource = PIXI.loader.resources[resourceName];
-            if (resource && resource.texture) {
-                this.sprite = new Sprite(resource.texture);
+            const texture = getTexture(resourceName);
+            if (texture) {
+                this.sprite = new Sprite(texture);
                 this.sprite.anchor.set(0.5);
                 this.container.addChild(this.sprite);
             }

@@ -31,28 +31,28 @@ import { isVisible, onVisibilityChange } from "../Visibility";
 import { MainMenu } from "../menu/MainMenu";
 import * as Music from "../Music";
 import { MenuManager } from "../menu/MenuManager";
-import Sound from "pixi-sound/lib/Sound";
+import { getSound, getTexture } from "../loader";
 
 export class GameState extends BaseState {
     private menuManager: MenuManager;
     private gameEvents: GameEvents;
-    private hudSystem: HudSystem;
-    private itemSpawnSystem: ItemSpawnSystem;
-    private inputSystem: InputSystem;
-    private entityFactory: EntityFactory;
+    private hudSystem?: HudSystem;
+    private itemSpawnSystem?: ItemSpawnSystem;
+    private inputSystem?: InputSystem;
+    private entityFactory?: EntityFactory;
     private gameData: GameData;
     private mainMenu: MainMenu;
     private engine: Engine;
-    protected readonly sounds: { [s: string]: Sound } = {
-        menu_open: (<any>PIXI.loader.resources).menu_open.sound,
-        menu_close: (<any>PIXI.loader.resources).menu_close.sound
+    protected readonly sounds: { [s: string]: pixiSound.Sound } = {
+        menu_open: getSound("menu_open"),
+        menu_close: getSound("menu_close")
     };
 
     public constructor(manager: StateManager) {
         super(manager);
         Music.fadeTo('ambience');
 
-        this.container.addChild(new Sprite(PIXI.loader.resources.background.texture));
+        this.container.addChild(new Sprite(getTexture("background")));
         this.container.alpha = 0;
 
         this.engine = new Engine();
@@ -84,16 +84,16 @@ export class GameState extends BaseState {
         // Main menu:
         this.gameEvents.startGame.connect((forceRestart: boolean) => {
             if (!this.gameData.playing || forceRestart) {
-                this.itemSpawnSystem.restart();
-                this.hudSystem.showCenterText("", 0);
+                this.itemSpawnSystem!.restart();
+                this.hudSystem!.showCenterText("", 0);
             }
             this.menuManager.popAllPages();
-            this.hudSystem.setVisible(true);
+            this.hudSystem!.setVisible(true);
         });
         this.gameEvents.gameWon.connect(() => {
             this.menuManager.popAllPages();
             this.menuManager.pushPage(this.mainMenu);
-            this.hudSystem.setVisible(false);
+            this.hudSystem!.setVisible(false);
             this.mainMenu.showCredits();
         });
         this.menuManager = new MenuManager(this.container);
@@ -118,7 +118,7 @@ export class GameState extends BaseState {
         if (this.menuManager.isVisible())
             this.menuManager.onKeyUp(e);
         else if (e.keyCode !== Key.Escape)
-            this.inputSystem.onKeyUp(e);
+            this.inputSystem!.onKeyUp(e);
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -129,7 +129,7 @@ export class GameState extends BaseState {
         } else if (e.keyCode === Key.Enter && this.gameData.lifes === 0)
             this.gameEvents.startGame.emit(true);
         else
-            this.inputSystem.onKeyDown(e);
+            this.inputSystem!.onKeyDown(e);
     }
 
     private showMenu(playSound = true) {
@@ -137,9 +137,9 @@ export class GameState extends BaseState {
             this.sounds.menu_open.play();
 
         if (this.gameData.lifes === 0)
-            this.itemSpawnSystem.stop();
+            this.itemSpawnSystem!.stop();
         this.menuManager.pushPage(this.mainMenu);
-        this.hudSystem.setVisible(false);
+        this.hudSystem!.setVisible(false);
     }
 
     private registerVisibleChange() {
@@ -191,7 +191,7 @@ export class GameState extends BaseState {
             }
             entityBlueprint.add(cb);
         }
-        this.entityFactory.addEntityBlueprint(name, entityBlueprint);
+        this.entityFactory!.addEntityBlueprint(name, entityBlueprint);
     }
 
     public update(deltaTime: number) {

@@ -9,7 +9,7 @@ import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
 import { LifeTimeComponent } from "../Components";
 
 export class LifeTimeSystem extends IteratingSystem {
-    gameEvents: GameEvents | null;
+    gameEvents: GameEvents | null = null;
 
     constructor() {
         super(Family.all(LifeTimeComponent).get());

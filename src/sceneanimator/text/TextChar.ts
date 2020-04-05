@@ -5,7 +5,7 @@
  */
 
 import { Vec2 } from "../../Vec2";
-import { TextStyle, TextMetrics, Container } from "pixi.js";
+import { Text, TextStyle, TextMetrics, Container } from "pixi.js";
 import { TextAnimation } from "../SceneAnimatorJson";
 import { getDefault } from "../SceneAnimator";
 
@@ -22,7 +22,7 @@ function randomFloat(min: number, max: number) {
 }
 
 export class TextChar {
-    private readonly text: PIXI.Text;
+    private readonly text: Text;
     private readonly start = new Vec2();
     private readonly control = new Vec2();
     private readonly end = new Vec2();
@@ -36,7 +36,7 @@ export class TextChar {
             this.end.x = bounds.width - style.strokeThickness;
         }
 
-        this.text = new PIXI.Text(text[index], style);
+        this.text = new Text(text[index], style);
         this.text.anchor.set(0, 0.5);
         this.text.visible = startTime <= 0;
         parent.addChild(this.text);

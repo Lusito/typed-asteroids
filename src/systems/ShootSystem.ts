@@ -11,8 +11,8 @@ import { SignalConnection } from "typed-signals";
 import { Vec2 } from "../Vec2";
 
 export class ShootSystem extends EntitySystem {
-    players: Entity[] | null;
-    private gameEvents: GameEvents | null;
+    players: Entity[] | null = null;
+    private gameEvents: GameEvents | null = null;
     private shootConnection?: SignalConnection;
     private dir = new Vec2();
     private origin = new Vec2();

@@ -7,15 +7,16 @@
 import { Component, ComponentFactory, ComponentBlueprint, Constructor, Entity } from "typed-ecstasy";
 import { Sprite } from "pixi.js";
 import { Vec2 } from "./Vec2";
-import Sound from "pixi-sound/lib/Sound";
+import pixiSound from "pixi-sound";
 import { StateSpriteContainer } from "./StateSpriteContainer";
 import { SpriteStateDef } from "./PossibleComponentDefs";
+import { getTexture, getSound } from "./loader";
 
 export class PlayerComponent extends Component {
-	acceleration: number;
-	maxSpeed: number;
-	spawnProtection: number;
-	spawnProtectionFade: number;
+	acceleration = 0;
+	maxSpeed = 0;
+	spawnProtection = 0;
+	spawnProtectionFade = 0;
 }
 
 export class PlayerComponentFactory extends ComponentFactory {
@@ -76,10 +77,10 @@ export class InputComponentFactory extends ComponentFactory {
 
 export class SpriteComponent extends Component {
 	sprites: StateSpriteContainer[] = [];
-	layer: string;
-	popTime: number;
-	popTimeFull: number;
-	scale: number;
+	layer = "";
+	popTime = 0;
+	popTimeFull = 0;
+	scale = 1;
 }
 
 export class SpriteComponentFactory extends ComponentFactory {
@@ -92,7 +93,7 @@ export class SpriteComponentFactory extends ComponentFactory {
 		for (let i = 0; i < 4; i++) {
 			let container = new StateSpriteContainer();
 			for (let state of states) {
-				let sprite = new Sprite(PIXI.loader.resources[state.texture].texture);
+				let sprite = new Sprite(getTexture(state.texture));
 				sprite.anchor.set(0.5);
 				container.addState(state.name, sprite);
 			}
@@ -105,7 +106,7 @@ export class SpriteComponentFactory extends ComponentFactory {
 }
 
 export class PowerupComponent extends Component {
-	extraLifes: number;
+	extraLifes = 0;
 }
 
 export class PowerupComponentFactory extends ComponentFactory {
@@ -117,9 +118,9 @@ export class PowerupComponentFactory extends ComponentFactory {
 }
 
 export class PhysicsComponent extends Component {
-	radius: number;
-	group: string;
-	collidesWith: string[];
+	radius = 0;
+	group = "";
+	collidesWith: string[] = [];
 }
 
 export class PhysicsComponentFactory extends ComponentFactory {
@@ -133,11 +134,11 @@ export class PhysicsComponentFactory extends ComponentFactory {
 }
 
 export class DeathSpawnsComponent extends Component {
-	entity: string;
-	countMin: number;
-	countMax: number;
-	speedMin: number;
-	speedMax: number;
+	entity = "";
+	countMin = 0;
+	countMax = 0;
+	speedMin = 0;
+	speedMax = 0;
 }
 
 export class DeathSpawnsComponentFactory extends ComponentFactory {
@@ -153,7 +154,7 @@ export class DeathSpawnsComponentFactory extends ComponentFactory {
 }
 
 export class ShieldComponent extends Component {
-	lifeTime: number;
+	lifeTime = 0;
 }
 
 export class ShieldComponentFactory extends ComponentFactory {
@@ -165,7 +166,7 @@ export class ShieldComponentFactory extends ComponentFactory {
 }
 
 export class LifeTimeComponent extends Component {
-	lifeTime: number;
+	lifeTime = 0;
 }
 
 export class LifeTimeComponentFactory extends ComponentFactory {
@@ -177,9 +178,9 @@ export class LifeTimeComponentFactory extends ComponentFactory {
 }
 
 export class SoundsComponent extends Component {
-	spawn?: Sound;
-	die?: Sound;
-	pickup?: Sound;
+	spawn?: pixiSound.Sound;
+	die?: pixiSound.Sound;
+	pickup?: pixiSound.Sound;
 }
 
 export class SoundsComponentFactory extends ComponentFactory {
@@ -187,13 +188,13 @@ export class SoundsComponentFactory extends ComponentFactory {
 		let comp = entity.add(new SoundsComponent());
 		let key = blueprint.getString("spawn", "");
 		if (key)
-			comp.spawn = (<any>PIXI.loader.resources)[key].sound;
+			comp.spawn = getSound(key);
 		key = blueprint.getString("die", "");
 		if (key)
-			comp.die = (<any>PIXI.loader.resources)[key].sound;
+			comp.die = getSound(key);
 		key = blueprint.getString("pickup", "");
 		if (key)
-			comp.pickup = (<any>PIXI.loader.resources)[key].sound;
+			comp.pickup = getSound(key);
 		return true;
 	}
 }

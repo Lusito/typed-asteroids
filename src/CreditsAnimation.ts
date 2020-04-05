@@ -52,7 +52,7 @@ export let creditsAnimation: SceneAnimatorJSON = {
                 { "type": "text", "path": "text", "style": "text_center", "text": "lucasgonze", "delay": 1.35 },
 
                 { "type": "text", "path": "text", "group": "title", "style": "title_center", "text": "Used Libraries", "delay": 3.3 },
-                { "type": "text", "path": "text", "style": "text_left", "text": "PixiJS v4  ", "delay": 1.35 },
+                { "type": "text", "path": "text", "style": "text_left", "text": "PixiJS v5  ", "delay": 1.35 },
                 { "type": "text", "path": "text", "style": "text_right", "text": "  pixi-sound", "delay": 0 },
                 { "type": "text", "path": "text", "style": "text_left", "text": "typed-ecstasy  ", "delay": 1.35 },
                 { "type": "text", "path": "text", "style": "text_right", "text": "  typed-signals", "delay": 0 },

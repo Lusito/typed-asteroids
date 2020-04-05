@@ -9,7 +9,7 @@ import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
 import { ShieldComponent } from "../Components";
 
 export class ShieldSystem extends IteratingSystem {
-    gameEvents: GameEvents | null;
+    gameEvents: GameEvents | null = null;
 
     constructor() {
         super(Family.all(ShieldComponent).get());

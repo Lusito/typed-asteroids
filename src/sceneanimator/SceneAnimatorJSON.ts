@@ -4,7 +4,9 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-import { TextStyleOptions } from "pixi.js";
+import { TextStyle } from "pixi.js";
+
+type TextStyleOptions = ConstructorParameters<typeof TextStyle>[0];
 
 export interface DestinationJSON {
     x: number;

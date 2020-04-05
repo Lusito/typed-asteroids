@@ -10,7 +10,7 @@ import { Vec2 } from "../Vec2";
 import { GameEvents } from "../GameEvents";
 
 export class CollisionSystem extends IteratingSystem {
-    gameEvents: GameEvents | null;
+    gameEvents: GameEvents | null = null;
     constructor() {
         super(Family.all(PositionComponent, PhysicsComponent).exclude(ShieldComponent).get());
     }

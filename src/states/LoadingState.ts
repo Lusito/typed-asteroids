@@ -6,11 +6,10 @@
 
 import { BaseState } from "./BaseState";
 import { StateManager } from "./StateManager";
-import { Graphics } from "pixi.js";
+import { Graphics, Text } from "pixi.js";
 import { PreloadMap } from "../PreloadMap";
 import { IntroState } from "./IntroState";
-import * as Music from "../Music";
-import pixiSound from "pixi-sound";
+import { getProgress, addOnProgress, addOnCompleteOnce, preload, startLoading } from "../loader";
 
 const TEXT_STYLE = {
     fontSize: 24,
@@ -22,35 +21,33 @@ const TEXT_STYLE = {
 };
 
 export class LoadingState extends BaseState {
-    private text: PIXI.Text;
+    private text: Text;
     private progressBar: Graphics;
 
     public constructor(manager: StateManager) {
         super(manager);
-        pixiSound;
         this.progressBar = new Graphics();
         this.container.addChild(this.progressBar);
-        this.text = new PIXI.Text("Loading: 0%", TEXT_STYLE);
+        this.text = new Text("Loading: 0%", TEXT_STYLE);
         this.text.x = 400;
         this.text.y = 300;
         this.text.anchor.set(0.5);
         this.container.addChild(this.text);
 
         const onProgress = () => {
-            this.setProgress(PIXI.loader.progress / 100);
+            this.setProgress(getProgress() / 100);
         };
-        const progressHandle = PIXI.loader.onProgress.add(onProgress);
-        PIXI.loader.onComplete.once(() => {
-            Music.initResources();
-            PIXI.loader.onProgress.detach(progressHandle);
+        const detachOnProgress = addOnProgress(onProgress);
+        addOnCompleteOnce(() => {
+            detachOnProgress();
             new IntroState(manager);
             this.destroy();
         });
 
         for (let key in PreloadMap) {
-            PIXI.loader.add(key, 'assets/' + PreloadMap[key]);
+            preload(key, PreloadMap[key]);
         }
-        PIXI.loader.load();
+        startLoading();
     }
 
     private setProgress(pct: number) {

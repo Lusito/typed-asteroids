@@ -1,21 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": [
-      "es2015", "dom"
-    ],
-    "sourceMap": true,
-    "outDir": "./dist",
+    "target": "ES2015",
+    "module": "CommonJS",
+    "declaration": true,
+    "lib": ["ES2015", "DOM"],
+    "noEmit": true,
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
+    "esModuleInterop": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true
-  }
+    "moduleResolution": "node"
+  },
+  "exclude": ["dist"]
 }

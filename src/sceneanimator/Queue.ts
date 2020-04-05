@@ -11,8 +11,8 @@ export class Queue {
 
     protected readonly originalStartTime: number;
     protected startTime: number;
-    public next: Queue;
-    public finalNext: Queue;
+    public next: Queue | null = null;
+    public finalNext: Queue | null = null;
     protected readonly items: Item[];
     public readonly animations: Animation[];
     public readonly layer: number;

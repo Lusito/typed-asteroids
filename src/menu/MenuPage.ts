@@ -6,8 +6,10 @@
 
 import { Container } from "pixi.js";
 import { Key } from "ts-keycode-enum";
-import Sound from "pixi-sound/lib/Sound";
+import pixiSound from "pixi-sound";
+import { Text } from "pixi.js";
 import { MenuManager } from "./MenuManager";
+import { getSound } from "../loader";
 
 const MENU_TEXT_STYLE = {
     fontSize: 24,
@@ -19,10 +21,10 @@ const MENU_TEXT_STYLE = {
 };
 
 class MenuItem {
-    public readonly text: PIXI.Text;
+    public readonly text: Text;
     public readonly callback: () => void;
     public constructor(text: string, callback: () => void) {
-        this.text = new PIXI.Text(text, MENU_TEXT_STYLE);
+        this.text = new Text(text, MENU_TEXT_STYLE);
         this.text.anchor.set(0, 0.5);
         this.callback = callback;
     }
@@ -33,9 +35,9 @@ export class MenuPage {
     protected readonly container = new Container();
     protected index = 0;
     protected items: MenuItem[] = [];
-    protected readonly sounds: { [s: string]: Sound } = {
-        menu_move: (<any>PIXI.loader.resources).menu_move.sound,
-        menu_select: (<any>PIXI.loader.resources).menu_select.sound
+    protected readonly sounds: { [s: string]: pixiSound.Sound } = {
+        menu_move: getSound("menu_move"),
+        menu_select: getSound("menu_select")
     };
 
     public constructor(manager: MenuManager) {

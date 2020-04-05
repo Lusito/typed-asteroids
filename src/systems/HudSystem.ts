@@ -6,8 +6,9 @@
 
 import { GameEvents } from "../GameEvents";
 import { Engine, EntitySystem } from "typed-ecstasy";
-import { Sprite, Container } from "pixi.js";
+import { Text, Sprite, Container } from "pixi.js";
 import { GameData } from "../GameData";
+import { getTexture } from "../loader";
 
 const CENTER_TEXT_STYLE = {
     fontSize: 36,
@@ -27,11 +28,11 @@ const LEVEL_TEXT_STYLE = {
 };
 export class HudSystem extends EntitySystem {
     hudContainer: Container;
-    centerShowTime: number;
-    gameData: GameData | null;
-    gameEvents: GameEvents | null;
-    centerText: PIXI.Text;
-    levelText: PIXI.Text;
+    centerShowTime = 0;
+    gameData: GameData | null = null;
+    gameEvents: GameEvents | null = null;
+    centerText: Text;
+    levelText: Text;
     level: number = 0;
     lifeSprites: Sprite[] = [];
     // hud: life top left, level top right
@@ -41,15 +42,15 @@ export class HudSystem extends EntitySystem {
         super();
         this.hudContainer = container.addChild(new Container());
         this.hudContainer.visible = false;
-        this.hudContainer.addChild(this.centerText = new PIXI.Text('', CENTER_TEXT_STYLE));
+        this.hudContainer.addChild(this.centerText = new Text('', CENTER_TEXT_STYLE));
         this.centerText.x = 400;
         this.centerText.y = 300;
         this.centerText.anchor.set(0.5);
-        this.hudContainer.addChild(this.levelText = new PIXI.Text('Level: 1', LEVEL_TEXT_STYLE));
+        this.hudContainer.addChild(this.levelText = new Text('Level: 1', LEVEL_TEXT_STYLE));
         this.levelText.anchor.set(1, 0);
         this.levelText.x = 800;
         this.levelText.y = 0;
-        let lifeTexture = PIXI.loader.resources.item_extralife.texture;
+        let lifeTexture = getTexture("item_extralife");
         for (let i = 0; i < 5; i++) {
             let sprite = new Sprite(lifeTexture);
             this.lifeSprites.push(this.hudContainer.addChild(sprite));

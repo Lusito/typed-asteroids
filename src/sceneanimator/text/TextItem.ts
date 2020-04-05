@@ -6,7 +6,7 @@
 
 import { Item } from "../Item";
 import { TextChar } from "./TextChar";
-import { TextStyle, TextMetrics, Container } from "pixi.js";
+import { Text, TextStyle, TextMetrics, Container } from "pixi.js";
 import { Animation } from "../SceneAnimatorJson";
 import { TextEffect, TextEffectFadeIn, TextEffectFadeOut, TextEffectConstruct, TextEffectType, TextEffectTypeInstant, TextEffectUntype, TextEffectUntypeInstant } from "./TextEffects";
 
@@ -25,7 +25,7 @@ export class TextItem extends Item {
 
     public readonly style: TextStyle;
     public readonly originalText: string;
-    public readonly text: PIXI.Text;
+    public readonly text: Text;
     public xOffset: number = 0;
 
     public chars: TextChar[] = [];
@@ -34,7 +34,7 @@ export class TextItem extends Item {
     public constructor(parent: Container, group: string, startTime: number, angle: number, opacity: number, text: string, style: TextStyle) {
         super(parent, group, startTime, angle, false, opacity);
         this.originalText = text;
-        this.text = new PIXI.Text(text, style);
+        this.text = new Text(text, style);
         this.container.addChild(this.text);
         this.text.text = text;
         this.text.anchor.set(0, 0.5);

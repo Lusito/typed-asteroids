@@ -9,10 +9,11 @@ import { Engine, Entity, EntitySystem } from "typed-ecstasy";
 import { SignalConnection } from "typed-signals";
 import { DeathSpawnsComponent, PositionComponent, PhysicsComponent, PlayerComponent, SoundsComponent, ShieldComponent, VelocityComponent, SpriteComponent } from "../Components";
 import { GameData } from "../GameData";
+import { getSound } from "../loader";
 
 export class DeathSystem extends EntitySystem {
-    gameData: GameData | null;
-    gameEvents: GameEvents | null;
+    gameData: GameData | null = null;
+    gameEvents: GameEvents | null = null;
     deathConnection?: SignalConnection;
     public constructor(priority: number = 0) {
         super(priority);
@@ -83,7 +84,7 @@ export class DeathSystem extends EntitySystem {
                     spc.popTime = spc.popTimeFull;
                 return;
             } else if (this.gameEvents) {
-                (<any>PIXI.loader.resources.lost).sound.play();
+                getSound("lost").play();
                 this.gameEvents.showCenterText.emit("You lost all your lifes, try again.", -1);
             }
         }

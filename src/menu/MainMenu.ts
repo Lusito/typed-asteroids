@@ -8,6 +8,7 @@ import { MenuPage } from "./MenuPage";
 import { GameEvents } from "../GameEvents";
 import { MenuManager } from "./MenuManager";
 import { CreditsMenu } from "./CreditsMenu";
+import { Text } from "pixi.js";
 
 const TITLE_TEXT_STYLE = {
     fontSize: 36,
@@ -34,12 +35,12 @@ export class MainMenu extends MenuPage {
         super(manager);
         this.creditsMenu = new CreditsMenu(manager, gameEvents);
 
-        let text = this.container.addChild(new PIXI.Text("Lusito's Asteroids Clone!", TITLE_TEXT_STYLE));
+        let text = this.container.addChild(new Text("Lusito's Asteroids Clone!", TITLE_TEXT_STYLE));
         text.anchor.set(0);
         text.x = 50;
         text.y = 80;
 
-        let hint = this.container.addChild(new PIXI.Text("( Use Arrow keys to navigate, Space to attack )", HINT_TEXT_STYLE));
+        let hint = this.container.addChild(new Text("( Use Arrow keys to navigate, Space to attack )", HINT_TEXT_STYLE));
         hint.anchor.set(0.5);
         hint.x = 400;
         hint.y = 550;

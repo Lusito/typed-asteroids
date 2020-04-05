@@ -10,6 +10,7 @@ import { SignalConnections } from "typed-signals";
 import { Engine, Family, Entity, EntitySystem } from "typed-ecstasy";
 import { PlayerComponent, LifeTimeComponent, PositionComponent, PhysicsComponent, ShieldComponent } from "../Components";
 import { GameData } from "../GameData";
+import { getSound } from "../loader";
 
 const levelAsteroidCounts = [
 	[2, 3, 4],
@@ -37,11 +38,11 @@ const screenCenter = new Vec2(400, 300);
 
 export class ItemSpawnSystem extends EntitySystem {
 	nextExtraLife: number = -1;
-	gameEvents: GameEvents | null;
-	gameData: GameData | null;
+	gameEvents: GameEvents | null = null;
+	gameData: GameData | null = null;
 	respawnPlayer = 0.1;
-	players: Entity[] | null;
-	enemies: Entity[] | null;
+	players: Entity[] | null = null;
+	enemies: Entity[] | null = null;
 	private readonly connections = new SignalConnections();
 
 	public constructor() {
@@ -97,7 +98,7 @@ export class ItemSpawnSystem extends EntitySystem {
 				}
 			} else if (this.enemies && this.enemies.length === 0) {
 				if (this.gameData.level >= levelAsteroidCounts.length) {
-					(<any>PIXI.loader.resources.win).sound.play();
+					getSound("win").play();
 					this.gameEvents.gameWon.emit();
 					this.stop(true);
 					return;
