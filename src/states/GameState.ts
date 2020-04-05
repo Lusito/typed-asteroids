@@ -16,7 +16,7 @@ import { InputSystem } from "../systems/InputSystem";
 import { MovementSystem } from "../systems/MovementSystem";
 import { ItemSpawnSystem } from "../systems/ItemSpawnSystem";
 import { PossibleComponentDefs } from "../PossibleComponentDefs";
-import { ComponentFactories, SoundsComponent, PowerupComponent } from "../components";
+import { componentFactories, SoundsComponent, PowerupComponent } from "../components";
 import * as Blueprints from "../Blueprints";
 import { GameEvents } from "../GameEvents";
 import { ShootSystem } from "../systems/ShootSystem";
@@ -169,8 +169,8 @@ export class GameState extends BaseState {
     private setupEntityFactory() {
         this.entityFactory = new EntityFactory();
         // Setup component factories
-        for (const e of Object.keys(ComponentFactories)) {
-            this.entityFactory.addComponentFactory(e, new ComponentFactories[e]());
+        for (const e of Object.keys(componentFactories)) {
+            this.entityFactory.addComponentFactory(e, componentFactories[e]);
         }
         this.engine.setEntityFactory(this.entityFactory);
 

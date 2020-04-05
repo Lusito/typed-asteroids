@@ -1,10 +1,4 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
-import { Component } from "typed-ecstasy";
+import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
 
 export class PhysicsComponent extends Component {
     radius = 0;
@@ -12,4 +6,12 @@ export class PhysicsComponent extends Component {
     group = "";
 
     collidesWith: string[] = [];
+}
+
+export function physicsComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
+    const comp = entity.add(new PhysicsComponent());
+    comp.radius = blueprint.getNumber("radius", 0);
+    comp.group = blueprint.getString("group", "");
+    comp.collidesWith = blueprint.getString("collidesWith", "").split(",");
+    return true;
 }

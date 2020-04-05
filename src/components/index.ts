@@ -1,16 +1,16 @@
-import { Constructor, ComponentFactory } from "typed-ecstasy";
+import { ComponentFactory } from "typed-ecstasy";
 
-import { PlayerComponentFactory } from "./PlayerComponentFactory";
-import { PositionComponentFactory } from "./PositionComponentFactory";
-import { VelocityComponentFactory } from "./VelocityComponentFactory";
-import { InputComponentFactory } from "./InputComponentFactory";
-import { SpriteComponentFactory } from "./SpriteComponentFactory";
-import { PowerupComponentFactory } from "./PowerupComponentFactory";
-import { PhysicsComponentFactory } from "./PhysicsComponentFactory";
-import { DeathSpawnsComponentFactory } from "./DeathSpawnsComponentFactory";
-import { ShieldComponentFactory } from "./ShieldComponentFactory";
-import { LifeTimeComponentFactory } from "./LifeTimeComponentFactory";
-import { SoundsComponentFactory } from "./SoundsComponentFactory";
+import { playerComponentFactory } from "./PlayerComponent";
+import { positionComponentFactory } from "./PositionComponent";
+import { velocityComponentFactory } from "./VelocityComponent";
+import { inputComponentFactory } from "./InputComponent";
+import { spriteComponentFactory } from "./SpriteComponent";
+import { powerupComponentFactory } from "./PowerupComponent";
+import { physicsComponentFactory } from "./PhysicsComponent";
+import { deathSpawnsComponentFactory } from "./DeathSpawnsComponent";
+import { shieldComponentFactory } from "./ShieldComponent";
+import { lifeTimeComponentFactory } from "./LifeTimeComponent";
+import { soundsComponentFactory } from "./SoundsComponent";
 
 export { PlayerComponent } from "./PlayerComponent";
 export { PositionComponent } from "./PositionComponent";
@@ -24,16 +24,16 @@ export { ShieldComponent } from "./ShieldComponent";
 export { LifeTimeComponent } from "./LifeTimeComponent";
 export { SoundsComponent } from "./SoundsComponent";
 
-export const ComponentFactories: { [e: string]: Constructor<ComponentFactory> } = {
-    Player: PlayerComponentFactory,
-    Position: PositionComponentFactory,
-    Velocity: VelocityComponentFactory,
-    Input: InputComponentFactory,
-    Sprite: SpriteComponentFactory,
-    Powerup: PowerupComponentFactory,
-    Physics: PhysicsComponentFactory,
-    DeathSpawns: DeathSpawnsComponentFactory,
-    Shield: ShieldComponentFactory,
-    LifeTime: LifeTimeComponentFactory,
-    Sounds: SoundsComponentFactory,
+export const componentFactories: { [e: string]: ComponentFactory } = {
+    Player: playerComponentFactory,
+    Position: positionComponentFactory,
+    Velocity: velocityComponentFactory,
+    Input: inputComponentFactory,
+    Sprite: spriteComponentFactory,
+    Powerup: powerupComponentFactory,
+    Physics: physicsComponentFactory,
+    DeathSpawns: deathSpawnsComponentFactory,
+    Shield: shieldComponentFactory,
+    LifeTime: lifeTimeComponentFactory,
+    Sounds: soundsComponentFactory,
 };

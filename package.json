@@ -31,7 +31,7 @@
     "pixi-sound": "^3.0.4",
     "pixi.js": "^5.2.1",
     "ts-keycode-enum": "^1.0.6",
-    "typed-ecstasy": "1.0.0",
+    "typed-ecstasy": "1.1.0",
     "typed-signals": "^2.0.0"
   },
   "devDependencies": {
