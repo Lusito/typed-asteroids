@@ -7,37 +7,23 @@
 import { Container } from "pixi.js";
 import { Key } from "ts-keycode-enum";
 import pixiSound from "pixi-sound";
-import { Text } from "pixi.js";
+
 import { MenuManager } from "./MenuManager";
 import { getSound } from "../loader";
-
-const MENU_TEXT_STYLE = {
-    fontSize: 24,
-    fontFamily: 'Arial',
-    fill: '#FFFFFF',
-    align: 'left',
-    stroke: '#000000',
-    strokeThickness: 3
-};
-
-class MenuItem {
-    public readonly text: Text;
-    public readonly callback: () => void;
-    public constructor(text: string, callback: () => void) {
-        this.text = new Text(text, MENU_TEXT_STYLE);
-        this.text.anchor.set(0, 0.5);
-        this.callback = callback;
-    }
-}
+import { MenuItem } from "./MenuItem";
 
 export class MenuPage {
     protected readonly manager: MenuManager;
+
     protected readonly container = new Container();
+
     protected index = 0;
+
     protected items: MenuItem[] = [];
+
     protected readonly sounds: { [s: string]: pixiSound.Sound } = {
         menu_move: getSound("menu_move"),
-        menu_select: getSound("menu_select")
+        menu_select: getSound("menu_select"),
     };
 
     public constructor(manager: MenuManager) {
@@ -60,21 +46,21 @@ export class MenuPage {
     }
 
     public addItem(y: number, text: string, callback: () => void) {
-        let index = this.items.length;
-        let item = new MenuItem(text, callback);
+        const index = this.items.length;
+        const item = new MenuItem(text, callback);
         item.text.x = 50;
         item.text.y = y;
         this.items.push(item);
         this.container.addChild(item.text);
         this.updateCursors();
-        let anyItem = item.text as any;
+        const anyItem = item.text as any;
         anyItem.interactive = true;
-        anyItem.click = (e: any) => {
+        anyItem.click = () => {
             this.index = index;
             this.updateCursors();
             item.callback();
         };
-        anyItem.mouseover = (e: any) => {
+        anyItem.mouseover = () => {
             this.index = index;
             this.updateCursors();
         };
@@ -91,15 +77,13 @@ export class MenuPage {
                 break;
             case Key.UpArrow:
                 this.index--;
-                if (this.index < 0)
-                    this.index = this.items.length - 1;
+                if (this.index < 0) this.index = this.items.length - 1;
                 this.updateCursors();
                 this.sounds.menu_move.play();
                 break;
             case Key.DownArrow:
                 this.index++;
-                if (this.index >= this.items.length)
-                    this.index = 0;
+                if (this.index >= this.items.length) this.index = 0;
                 this.updateCursors();
                 this.sounds.menu_move.play();
                 break;
@@ -110,17 +94,15 @@ export class MenuPage {
         }
     }
 
-    public onKeyUp(e: KeyboardEvent) {
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public onKeyUp(_e: KeyboardEvent) {}
 
     private updateCursors() {
-        for (let item of this.items)
-            item.text.scale.set(1);
-        let activeItem = this.items[this.index];
+        for (const item of this.items) item.text.scale.set(1);
+        const activeItem = this.items[this.index];
         activeItem.text.scale.set(1.2);
     }
 
-    public update(deltaTime: number) {
-    }
-
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public update(_deltaTime: number) {}
 }

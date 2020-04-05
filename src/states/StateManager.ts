@@ -5,10 +5,12 @@
  */
 
 import { Container } from "pixi.js";
+
 import { BaseState } from "./BaseState";
 
 export class StateManager {
     private stage: Container;
+
     private states: BaseState[] = [];
 
     public constructor(stage: Container) {
@@ -16,32 +18,29 @@ export class StateManager {
     }
 
     public destroy() {
-        for (let state of this.states) {
+        for (const state of this.states) {
             state.destroy();
         }
         this.states = [];
     }
 
-    public getStage(): Container {
+    public getStage() {
         return this.stage;
     }
 
     public addState(state: BaseState) {
-        let index = this.states.indexOf(state);
-        if (index === -1)
-            this.states.push(state);
+        const index = this.states.indexOf(state);
+        if (index === -1) this.states.push(state);
     }
 
     public removeState(state: BaseState) {
-        let index = this.states.indexOf(state);
-        if (index !== -1)
-            this.states.splice(index, 1);
+        const index = this.states.indexOf(state);
+        if (index !== -1) this.states.splice(index, 1);
     }
 
-    public update(deltaTime: number): void {
-        for (let state of this.states) {
-            if (state.isVisible())
-                state.update(deltaTime);
+    public update(deltaTime: number) {
+        for (const state of this.states) {
+            if (state.isVisible()) state.update(deltaTime);
         }
     }
 }

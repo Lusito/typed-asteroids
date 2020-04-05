@@ -1,11 +1,8 @@
 {
-  "main": "index.js",
   "name": "typed-asteroids",
-  "version": "0.8.0",
-  "description": "An asteroids clone showcasing typed-ecstasy and typed-signals",
-  "author": "Santo Pfingsten",
-  "license": "Zlib",
+  "version": "1.0.0",
   "private": true,
+  "description": "An asteroids clone showcasing typed-ecstasy and typed-signals",
   "homepage": "https://github.com/Lusito/typed-asteroids",
   "bugs": {
     "url": "https://github.com/Lusito/typed-asteroids/issues"
@@ -14,15 +11,21 @@
     "type": "git",
     "url": "https://github.com/Lusito/typed-asteroids.git"
   },
+  "license": "Zlib",
+  "author": "Santo Pfingsten",
+  "main": "index.js",
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "rimraf dist && tsc && parcel build src/index.html --public-url . --no-source-maps"
-  },
-  "devDependencies": {
-    "parcel-bundler": "^1.12.4",
-    "parcel-plugin-static-files-copy": "^2.3.1",
-    "rimraf": "^3.0.2",
-    "typescript": "^3.8.3"
+    "build": "rimraf dist && tsc && parcel build src/index.html --public-url . --no-source-maps",
+    "lint": "npm run lint:style && npm run lint:es && npm run lint:package",
+    "lint:es": "eslint {src,test}/**/*.{ts,tsx} --ext .ts,.tsx --ignore-path .prettierignore",
+    "lint:es:fix": "npm run lint:es -- --fix",
+    "lint:fix": "npm run lint:style:fix && npm run lint:es:fix && npm run lint:package:fix",
+    "lint:package": "sort-package-json --check",
+    "lint:package:fix": "sort-package-json",
+    "lint:style": "npm run lint:style:base -- --check",
+    "lint:style:base": "prettier {src,test}/**/*.{ts,tsx,js,json} ./*.{ts,tsx,js,json}",
+    "lint:style:fix": "npm run lint:style:base -- --write",
+    "start": "parcel src/index.html"
   },
   "dependencies": {
     "pixi-sound": "^3.0.4",
@@ -30,5 +33,15 @@
     "ts-keycode-enum": "^1.0.6",
     "typed-ecstasy": "1.0.0",
     "typed-signals": "^2.0.0"
+  },
+  "devDependencies": {
+    "@lusito/eslint-config": "^1.0.4",
+    "@lusito/prettier-config": "^1.0.0",
+    "@lusito/stylelint-config": "^1.0.0",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.3.1",
+    "rimraf": "^3.0.2",
+    "sort-package-json": "^1.40.0",
+    "typescript": "^3.8.3"
   }
 }

@@ -4,36 +4,44 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-import { GameEvents } from "../GameEvents";
 import { Engine, EntitySystem } from "typed-ecstasy";
 import { Text, Sprite, Container } from "pixi.js";
+
+import { GameEvents } from "../GameEvents";
 import { GameData } from "../GameData";
 import { getTexture } from "../loader";
 
 const CENTER_TEXT_STYLE = {
     fontSize: 36,
-    fontFamily: 'Arial',
-    fill: '#FFFFFF',
-    align: 'center',
-    stroke: '#000000',
-    strokeThickness: 3
+    fontFamily: "Arial",
+    fill: "#FFFFFF",
+    align: "center",
+    stroke: "#000000",
+    strokeThickness: 3,
 };
 const LEVEL_TEXT_STYLE = {
     fontSize: 24,
-    fontFamily: 'Arial',
-    fill: '#FFFFFF',
-    align: 'right',
-    stroke: '#000000',
-    strokeThickness: 3
+    fontFamily: "Arial",
+    fill: "#FFFFFF",
+    align: "right",
+    stroke: "#000000",
+    strokeThickness: 3,
 };
 export class HudSystem extends EntitySystem {
     hudContainer: Container;
+
     centerShowTime = 0;
+
     gameData: GameData | null = null;
+
     gameEvents: GameEvents | null = null;
+
     centerText: Text;
+
     levelText: Text;
-    level: number = 0;
+
+    level = 0;
+
     lifeSprites: Sprite[] = [];
     // hud: life top left, level top right
     // messages all centered
@@ -42,17 +50,17 @@ export class HudSystem extends EntitySystem {
         super();
         this.hudContainer = container.addChild(new Container());
         this.hudContainer.visible = false;
-        this.hudContainer.addChild(this.centerText = new Text('', CENTER_TEXT_STYLE));
+        this.hudContainer.addChild((this.centerText = new Text("", CENTER_TEXT_STYLE)));
         this.centerText.x = 400;
         this.centerText.y = 300;
         this.centerText.anchor.set(0.5);
-        this.hudContainer.addChild(this.levelText = new Text('Level: 1', LEVEL_TEXT_STYLE));
+        this.hudContainer.addChild((this.levelText = new Text("Level: 1", LEVEL_TEXT_STYLE)));
         this.levelText.anchor.set(1, 0);
         this.levelText.x = 800;
         this.levelText.y = 0;
-        let lifeTexture = getTexture("item_extralife");
+        const lifeTexture = getTexture("item_extralife");
         for (let i = 0; i < 5; i++) {
-            let sprite = new Sprite(lifeTexture);
+            const sprite = new Sprite(lifeTexture);
             this.lifeSprites.push(this.hudContainer.addChild(sprite));
             sprite.x = i * (sprite.getBounds().width + 5);
             sprite.y = 0;
@@ -67,8 +75,7 @@ export class HudSystem extends EntitySystem {
         super.addedToEngine(engine);
         this.gameEvents = engine.lookup.get(GameEvents);
         this.gameData = engine.lookup.get(GameData);
-        if (this.gameEvents)
-            this.gameEvents.showCenterText.connect(this.showCenterText.bind(this)); //fixme: disconnect
+        if (this.gameEvents) this.gameEvents.showCenterText.connect(this.showCenterText.bind(this)); // fixme: disconnect
     }
 
     protected removedFromEngine(engine: Engine) {
@@ -77,23 +84,20 @@ export class HudSystem extends EntitySystem {
         this.gameData = null;
     }
 
-    public update(deltaTime: number): void {
-        if (!this.gameData)
-            return;
+    public update(deltaTime: number) {
+        if (!this.gameData) return;
         for (let i = 0; i < 5; i++) {
-            let sprite = this.lifeSprites[i];
+            const sprite = this.lifeSprites[i];
             sprite.alpha = i < this.gameData.lifes ? 1 : 0.3;
         }
         if (this.level !== this.gameData.level) {
             this.level = this.gameData.level;
-            this.levelText.text = 'Level: ' + this.level;
+            this.levelText.text = `Level: ${this.level}`;
         }
         if (this.centerShowTime > 0) {
             this.centerShowTime -= deltaTime;
-            if (this.centerShowTime < 0)
-                this.centerShowTime = 0;
-            if (this.centerShowTime < 0.7)
-                this.centerText.alpha = this.centerShowTime;
+            if (this.centerShowTime < 0) this.centerShowTime = 0;
+            if (this.centerShowTime < 0.7) this.centerText.alpha = this.centerShowTime;
         }
     }
 

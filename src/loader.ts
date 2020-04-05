@@ -4,7 +4,7 @@ let loader: Loader;
 
 export function setLoader(loaderInstance: Loader) {
     loader = loaderInstance;
-(window as any).loader = loader;
+    (window as any).loader = loader;
 }
 
 export function getTexture(name: string) {

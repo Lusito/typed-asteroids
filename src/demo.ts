@@ -5,6 +5,7 @@
  */
 
 import { Application } from "pixi.js";
+
 import { StateManager } from "./states/StateManager";
 import { LoadingState } from "./states/LoadingState";
 import { setLoader } from "./loader";
@@ -12,13 +13,14 @@ import { setLoader } from "./loader";
 const app = new Application({
     width: 800,
     height: 600,
-    backgroundColor: 0
+    backgroundColor: 0,
 });
 document.body.appendChild(app.view);
 
 setLoader(app.loader);
 
 const stateManager = new StateManager(app.stage);
+// eslint-disable-next-line no-new
 new LoadingState(stateManager);
 // Listen for animate update
 app.ticker.add(() => {

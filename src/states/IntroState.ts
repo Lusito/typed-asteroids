@@ -19,11 +19,12 @@ export class IntroState extends BaseState {
         this.animator = new SceneAnimator(introAnimation, this.container);
         this.animator.addListener({
             onSceneEnd: () => {
+                // eslint-disable-next-line no-new
                 new GameState(manager);
                 this.destroy();
-            }
+            },
         });
-        Music.fadeTo('intro', false);
+        Music.fadeTo("intro", false);
     }
 
     public update(deltaTime: number) {

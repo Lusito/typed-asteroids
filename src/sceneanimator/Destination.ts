@@ -7,7 +7,9 @@
 import { Vec2 } from "../Vec2";
 
 export class Destination extends Vec2 {
-    speed: number = 0;
-    moveTime: number = 0;
-    startTime: number = 0;
+    speed = 0;
+
+    moveTime = 0;
+
+    startTime = 0;
 }

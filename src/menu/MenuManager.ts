@@ -4,15 +4,20 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-import { MenuPage } from "./MenuPage";
 import { Signal } from "typed-signals";
 import { Container } from "pixi.js";
 
+import type { MenuPage } from "./MenuPage";
+
 export class MenuManager {
     public readonly container: Container;
+
     private currentPage: MenuPage | null = null;
+
     private readonly allPages: MenuPage[] = [];
+
     private readonly pageStack: MenuPage[] = [];
+
     public readonly emptyPop = new Signal<() => void>();
 
     public constructor(stage: Container) {
@@ -20,26 +25,24 @@ export class MenuManager {
         stage.addChild(this.container);
     }
 
-    public register(page: MenuPage): void {
+    public register(page: MenuPage) {
         this.allPages.push(page);
     }
 
-    public update(deltaTime: number): void {
-        if (this.currentPage)
-            this.currentPage.update(deltaTime);
+    public update(deltaTime: number) {
+        if (this.currentPage) this.currentPage.update(deltaTime);
     }
 
-    public isVisible(): boolean {
+    public isVisible() {
         return this.currentPage !== null;
     }
 
-    public destroy(): void {
-        for (let page of this.allPages)
-            page.destroy();
+    public destroy() {
+        for (const page of this.allPages) page.destroy();
         this.container.destroy();
     }
 
-    public pushPage(page: MenuPage): void {
+    public pushPage(page: MenuPage) {
         if (this.currentPage != null) {
             this.currentPage.setVisible(false);
             this.pageStack.push(this.currentPage);
@@ -48,11 +51,10 @@ export class MenuManager {
         this.currentPage.setVisible(true);
     }
 
-    public popPage(): void {
-        if (this.currentPage)
-            this.currentPage.setVisible(false);
+    public popPage() {
+        if (this.currentPage) this.currentPage.setVisible(false);
 
-        let page = this.pageStack.pop();
+        const page = this.pageStack.pop();
         if (!page) {
             this.currentPage = null;
             this.emptyPop.emit();
@@ -62,18 +64,15 @@ export class MenuManager {
         }
     }
 
-    public popAllPages(): void {
-        while (this.currentPage)
-            this.popPage();
+    public popAllPages() {
+        while (this.currentPage) this.popPage();
     }
 
     public onKeyDown(e: KeyboardEvent) {
-        if (this.currentPage)
-            this.currentPage.onKeyDown(e);
+        if (this.currentPage) this.currentPage.onKeyDown(e);
     }
 
     public onKeyUp(e: KeyboardEvent) {
-        if (this.currentPage)
-            this.currentPage.onKeyUp(e);
+        if (this.currentPage) this.currentPage.onKeyUp(e);
     }
 }

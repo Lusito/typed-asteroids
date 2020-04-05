@@ -25,7 +25,15 @@ export interface BaseAnimation {
 
 export interface TextAnimation extends BaseAnimation {
     type: "text";
-    effect: "fade_in" | "fade_out" | "construct" | "construct_type" | "type" | "type_instant" | "untype" | "untype_instant";
+    effect:
+        | "fade_in"
+        | "fade_out"
+        | "construct"
+        | "construct_type"
+        | "type"
+        | "type_instant"
+        | "untype"
+        | "untype_instant";
     effectTime?: number;
     // For text explosion animation
     minRadius?: number;

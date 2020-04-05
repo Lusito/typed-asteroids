@@ -4,24 +4,26 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
+import { Graphics, Text } from "pixi.js";
+
 import { BaseState } from "./BaseState";
 import { StateManager } from "./StateManager";
-import { Graphics, Text } from "pixi.js";
 import { PreloadMap } from "../PreloadMap";
 import { IntroState } from "./IntroState";
 import { getProgress, addOnProgress, addOnCompleteOnce, preload, startLoading } from "../loader";
 
 const TEXT_STYLE = {
     fontSize: 24,
-    fontFamily: 'Arial',
-    fill: '#FFFFFF',
-    align: 'center',
-    stroke: '#000000',
-    strokeThickness: 3
+    fontFamily: "Arial",
+    fill: "#FFFFFF",
+    align: "center",
+    stroke: "#000000",
+    strokeThickness: 3,
 };
 
 export class LoadingState extends BaseState {
     private text: Text;
+
     private progressBar: Graphics;
 
     public constructor(manager: StateManager) {
@@ -40,11 +42,12 @@ export class LoadingState extends BaseState {
         const detachOnProgress = addOnProgress(onProgress);
         addOnCompleteOnce(() => {
             detachOnProgress();
+            // eslint-disable-next-line no-new
             new IntroState(manager);
             this.destroy();
         });
 
-        for (let key in PreloadMap) {
+        for (const key of Object.keys(PreloadMap)) {
             preload(key, PreloadMap[key]);
         }
         startLoading();
@@ -53,7 +56,7 @@ export class LoadingState extends BaseState {
     private setProgress(pct: number) {
         this.progressBar.clear();
         this.progressBar.lineStyle(0, 0x000000, 1);
-        this.progressBar.beginFill(0xFFFFFF, 1);
+        this.progressBar.beginFill(0xffffff, 1);
         this.progressBar.drawRect(50, 320, 700 * pct, 5);
         this.text.text = `Loading: ${Math.round(pct * 100).toFixed(1)}%`;
     }

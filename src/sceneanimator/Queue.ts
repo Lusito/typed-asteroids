@@ -5,18 +5,25 @@
  */
 
 import { Item } from "./Item";
-import { Animation } from "./SceneAnimatorJson";
+import { Animation } from "./SceneAnimatorJSON";
 
 export class Queue {
-
     protected readonly originalStartTime: number;
+
     protected startTime: number;
+
     public next: Queue | null = null;
+
     public finalNext: Queue | null = null;
+
     protected readonly items: Item[];
+
     public readonly animations: Animation[];
+
     public readonly layer: number;
+
     private done = false;
+
     private lastItemStarted = false;
 
     public constructor(time: number, layer: number, items: Item[], animations: Animation[]) {
@@ -28,35 +35,36 @@ export class Queue {
         this.reset();
     }
 
-    public reset(): void {
+    public reset() {
         this.startTime = this.originalStartTime;
         this.done = false;
         this.lastItemStarted = false;
-        for (let item of this.items) {
+        for (const item of this.items) {
             item.reset(this.animations);
         }
     }
 
-    public start(): void {
+    public start() {
         this.startTime = 0;
         this.update(0);
     }
 
-    public update(delta: number): void {
+    public update(delta: number) {
         if (this.startTime > 0) {
             this.startTime -= delta;
             if (this.startTime > 0) {
                 return;
-            } else if (this.startTime < 0) {
+            }
+            if (this.startTime < 0) {
                 delta = -this.startTime;
                 this.startTime = 0;
             }
         }
-        if (this.startTime == 0 && !this.done) {
+        if (this.startTime === 0 && !this.done) {
             this.done = true;
             let allStarted = true;
             // update items
-            for (let item of this.items) {
+            for (const item of this.items) {
                 item.update(delta);
                 if (!item.isStarted()) {
                     allStarted = false;
@@ -77,12 +85,11 @@ export class Queue {
         }
     }
 
-    public isDone(): boolean {
-        return this.startTime == 0 && this.done;
+    public isDone() {
+        return this.startTime === 0 && this.done;
     }
 
-    public abortPausePaths(): void {
-        for (let item of this.items)
-            item.abortPausePath();
+    public abortPausePaths() {
+        for (const item of this.items) item.abortPausePath();
     }
 }

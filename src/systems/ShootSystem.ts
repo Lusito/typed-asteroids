@@ -5,32 +5,37 @@
  */
 
 import { Entity, Family, Engine, EntitySystem } from "typed-ecstasy";
+import { SignalConnection } from "typed-signals";
+
 import { InputComponent, PositionComponent, VelocityComponent, PhysicsComponent } from "../Components";
 import { GameEvents } from "../GameEvents";
-import { SignalConnection } from "typed-signals";
 import { Vec2 } from "../Vec2";
 
 export class ShootSystem extends EntitySystem {
     players: Entity[] | null = null;
+
     private gameEvents: GameEvents | null = null;
+
     private shootConnection?: SignalConnection;
+
     private dir = new Vec2();
+
     private origin = new Vec2();
+
     private overrides = {
         Position: { x: 0, y: 0, rotation: 0 },
-        Velocity: { x: 0, y: 0 }
+        Velocity: { x: 0, y: 0 },
     };
-    constructor() { super(); }
 
-    public update(deltaTime: number) { }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public update() {}
 
     protected addedToEngine(engine: Engine) {
         super.addedToEngine(engine);
 
         this.players = engine.getEntitiesFor(Family.all(InputComponent, PositionComponent, VelocityComponent).get());
         this.gameEvents = engine.lookup.get(GameEvents);
-        if (this.gameEvents)
-            this.shootConnection = this.gameEvents.shoot.connect(this.shoot.bind(this));
+        if (this.gameEvents) this.shootConnection = this.gameEvents.shoot.connect(this.shoot.bind(this));
     }
 
     protected removedFromEngine(engine: Engine) {
@@ -44,16 +49,15 @@ export class ShootSystem extends EntitySystem {
     }
 
     private shoot() {
-        if (!this.gameEvents || !this.shoot || !this.players || !this.players.length)
-            return;
-        let entity = this.players[0];
-        let pc = entity.get(PositionComponent);
-        let vc = entity.get(VelocityComponent);
+        if (!this.gameEvents || !this.shoot || !this.players || !this.players.length) return;
+        const entity = this.players[0];
+        const pc = entity.get(PositionComponent);
+        const vc = entity.get(VelocityComponent);
         if (pc && vc) {
-            let phc = entity.get(PhysicsComponent);
-            let radius = phc ? phc.radius : 5;
-            //Fixme:
-            let velocity = 400;
+            const phc = entity.get(PhysicsComponent);
+            const radius = phc ? phc.radius : 5;
+            // Fixme:
+            const velocity = 400;
             this.dir.setAngle(pc.rotation - 90);
             this.origin.setFrom(pc.position).add(this.dir.scale(radius * 0.75));
             this.dir.setLength(velocity);

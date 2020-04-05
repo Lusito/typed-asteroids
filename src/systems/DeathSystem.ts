@@ -4,28 +4,41 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-import { GameEvents } from "../GameEvents";
 import { Engine, Entity, EntitySystem } from "typed-ecstasy";
 import { SignalConnection } from "typed-signals";
-import { DeathSpawnsComponent, PositionComponent, PhysicsComponent, PlayerComponent, SoundsComponent, ShieldComponent, VelocityComponent, SpriteComponent } from "../Components";
+
+import { GameEvents } from "../GameEvents";
+import {
+    DeathSpawnsComponent,
+    PositionComponent,
+    PhysicsComponent,
+    PlayerComponent,
+    SoundsComponent,
+    ShieldComponent,
+    VelocityComponent,
+    SpriteComponent,
+} from "../Components";
 import { GameData } from "../GameData";
 import { getSound } from "../loader";
 
 export class DeathSystem extends EntitySystem {
     gameData: GameData | null = null;
+
     gameEvents: GameEvents | null = null;
+
     deathConnection?: SignalConnection;
-    public constructor(priority: number = 0) {
+
+    public constructor(priority = 0) {
         super(priority);
     }
 
-    public update(deltaTime: number) { }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public update() {}
 
     protected addedToEngine(engine: Engine) {
         super.addedToEngine(engine);
         this.gameEvents = engine.lookup.get(GameEvents);
-        if (this.gameEvents)
-            this.deathConnection = this.gameEvents.death.connect(this.killEntity.bind(this));
+        if (this.gameEvents) this.deathConnection = this.gameEvents.death.connect(this.killEntity.bind(this));
         this.gameData = engine.lookup.get(GameData);
     }
 
@@ -38,17 +51,16 @@ export class DeathSystem extends EntitySystem {
         this.gameData = null;
     }
 
-
     private killEntity(entity: Entity) {
-        let pc = entity.get(PositionComponent);
-        let dsc = entity.get(DeathSpawnsComponent);
+        const pc = entity.get(PositionComponent);
+        const dsc = entity.get(DeathSpawnsComponent);
         if (pc && dsc && this.gameEvents) {
-            let phc = entity.get(PhysicsComponent);
-            let radius = phc ? phc.radius : 5;
+            const phc = entity.get(PhysicsComponent);
+            const radius = phc ? phc.radius : 5;
             this.gameEvents.spawnRandomEntities.emit({
                 classname: dsc.entity,
                 origin: pc.position,
-                count: dsc.countMin, //fixme: random
+                count: dsc.countMin, // fixme: random
                 minDist: radius * 0.15,
                 maxDist: radius * 0.35,
                 minSpeed: 50,
@@ -56,40 +68,37 @@ export class DeathSystem extends EntitySystem {
                 maxRot: 60,
                 spreadPct: 0.35,
                 radial: true,
-                alignAngle: true
+                alignAngle: true,
             });
         }
-        let plc = entity.get(PlayerComponent);
-        let sc = entity.get(SoundsComponent);
+        const plc = entity.get(PlayerComponent);
+        const sc = entity.get(SoundsComponent);
         if (plc && this.gameData && this.gameEvents) {
             this.gameData.lifes--;
             if (this.gameData.lifes > 0) {
-                plc.spawnProtection = plc.spawnProtection;
-                let shieldComponent = entity.add(new ShieldComponent());
+                const shieldComponent = entity.add(new ShieldComponent());
                 shieldComponent.lifeTime = plc.spawnProtection;
-                this.gameEvents.setStateSpriteVisible.emit(entity, 'shield', true);
-                if (sc && sc.spawn)
-                    sc.spawn.play();
+                this.gameEvents.setStateSpriteVisible.emit(entity, "shield", true);
+                if (sc?.spawn) sc.spawn.play();
                 if (pc) {
                     pc.position.set(400, 300);
                     pc.rotation = 0;
                 }
-                let vc = entity.get(VelocityComponent);
+                const vc = entity.get(VelocityComponent);
                 if (vc) {
                     vc.dir.zero();
                     vc.rotation = 0;
                 }
-                let spc = entity.get(SpriteComponent);
-                if (spc)
-                    spc.popTime = spc.popTimeFull;
+                const spc = entity.get(SpriteComponent);
+                if (spc) spc.popTime = spc.popTimeFull;
                 return;
-            } else if (this.gameEvents) {
+            }
+            if (this.gameEvents) {
                 getSound("lost").play();
                 this.gameEvents.showCenterText.emit("You lost all your lifes, try again.", -1);
             }
         }
-        if (sc && sc.die)
-            sc.die.play();
+        if (sc?.die) sc.die.play();
         entity.destroy();
     }
 }

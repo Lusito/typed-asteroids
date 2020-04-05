@@ -4,21 +4,17 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
+import { TextStyle, Container } from "pixi.js";
+
 import { Path } from "./Path";
 import { Queue } from "./Queue";
-import { SceneAnimatorJSON } from "./SceneAnimatorJson";
+import { SceneAnimatorJSON } from "./SceneAnimatorJSON";
 import { Destination } from "./Destination";
 import { LinearPath } from "./LinearPath";
 import { Item } from "./Item";
 import { TextItem } from "./text/TextItem";
 import { SpriteItem } from "./sprite/SpriteItem";
-import { TextStyle, Container } from "pixi.js";
-
-export function getDefault<T>(obj: any, key: string, def: T): T {
-    if (obj.hasOwnProperty(key))
-        return obj[key];
-    return def;
-}
+import { getDefault } from "./sceneAnimatorUtils";
 
 export interface SceneAnimatorListener {
     onSceneEnd(): void;
@@ -28,11 +24,17 @@ export class SceneAnimator {
     private readonly container: Container;
 
     private readonly textStyles: { [s: string]: TextStyle } = {};
+
     private readonly queues: { [s: string]: Queue } = {};
+
     private readonly queueArray: Queue[] = [];
+
     private readonly paths: { [s: string]: Path } = {};
+
     private timeFactor: number;
+
     private listeners: SceneAnimatorListener[] = [];
+
     private doneTriggered = false;
 
     public constructor(credits: SceneAnimatorJSON, parent: Container) {
@@ -48,71 +50,84 @@ export class SceneAnimator {
         this.container.destroy();
     }
 
-    public getTimeFactor(): number {
+    public getTimeFactor() {
         return this.timeFactor;
     }
 
-    public setTimeFactor(timeFactor: number): void {
+    public setTimeFactor(timeFactor: number) {
         this.timeFactor = timeFactor;
     }
 
-    private initStyles(credits: SceneAnimatorJSON): void {
-        for (let key in credits.textStyles) {
+    private initStyles(credits: SceneAnimatorJSON) {
+        for (const key of Object.keys(credits.textStyles)) {
             this.textStyles[key] = new TextStyle(credits.textStyles[key]);
         }
     }
 
-    private initPaths(credits: SceneAnimatorJSON): void {
-        for (let key in credits.paths) {
-            let value = credits.paths[key];
-            let destinations: Destination[] = []
+    private initPaths(credits: SceneAnimatorJSON) {
+        for (const key of Object.keys(credits.paths)) {
+            const value = credits.paths[key];
+            const destinations: Destination[] = [];
 
-            for (let dest of value.destinations) {
-                let destination = new Destination();
+            for (const dest of value.destinations) {
+                const destination = new Destination();
                 destination.x = dest.x != null ? dest.x : 0;
                 destination.y = dest.y != null ? dest.y : 0;
                 destination.speed = dest.speed != null ? dest.speed : 0;
                 destinations.push(destination);
             }
 
-            let path = new LinearPath(destinations);
+            const path = new LinearPath(destinations);
             this.paths[key] = path;
         }
     }
 
-    private initQueues(credits: SceneAnimatorJSON): void {
+    private initQueues(credits: SceneAnimatorJSON) {
         let style;
-        let startTime, angle, opacity, scale;
+        let startTime;
+        let angle;
+        let opacity;
+        let scale;
         let layer;
         let oriented;
         let group;
-        for (let key in credits.queues) {
-            let value = credits.queues[key];
+        for (const key of Object.keys(credits.queues)) {
+            const value = credits.queues[key];
 
             let itemStartTime = 0;
-            let items: Item[] = [];
-            for (let itemData of value.items) {
-                startTime = getDefault(itemData, 'delay', 0);
-                opacity = getDefault(itemData, 'opacity', 1);
-                group = getDefault(itemData, 'group', "");
-                angle = getDefault(itemData, 'angle', 0);
+            const items: Item[] = [];
+            for (const itemData of value.items) {
+                startTime = getDefault(itemData, "delay", 0);
+                opacity = getDefault(itemData, "opacity", 1);
+                group = getDefault(itemData, "group", "");
+                angle = getDefault(itemData, "angle", 0);
 
                 itemStartTime += startTime;
 
                 let item = null;
                 if (itemData.type === "sprite") {
-                    oriented = getDefault(itemData, 'oriented', false);
-                    scale = getDefault(itemData, 'scale', 1);
-                    item = new SpriteItem(this.container, itemData.type, group, scale, itemStartTime, angle, oriented, opacity, itemData.resource);
-                    if (itemData.hasOwnProperty('x') && itemData.hasOwnProperty('y')) {
-                        item.setPosition(itemData.x || 0, itemData.y || 0);
+                    oriented = getDefault(itemData, "oriented", false);
+                    scale = getDefault(itemData, "scale", 1);
+                    item = new SpriteItem(
+                        this.container,
+                        itemData.type,
+                        group,
+                        scale,
+                        itemStartTime,
+                        angle,
+                        oriented,
+                        opacity,
+                        itemData.resource
+                    );
+                    if ("x" in itemData && "y" in itemData) {
+                        item.setPosition(itemData.x ?? 0, itemData.y ?? 0);
                     }
                 } else if (itemData.type === "text") {
                     style = this.textStyles[itemData.style];
                     item = new TextItem(this.container, group, itemStartTime, angle, opacity, itemData.text, style);
 
-                    if (itemData.hasOwnProperty('x') && itemData.hasOwnProperty('y')) {
-                        item.setPosition(itemData.x || 0, itemData.y || 0);
+                    if ("x" in itemData && "y" in itemData) {
+                        item.setPosition(itemData.x ?? 0, itemData.y ?? 0);
                     }
                 }
                 if (item != null) {
@@ -121,16 +136,16 @@ export class SceneAnimator {
                 }
             }
 
-            startTime = getDefault(value, 'startTime', 0);
-            layer = getDefault(value, 'layer', 0);
-            let queue = new Queue(startTime, layer, items, value.animations || []);
+            startTime = getDefault(value, "startTime", 0);
+            layer = getDefault(value, "layer", 0);
+            const queue = new Queue(startTime, layer, items, value.animations ?? []);
             this.queues[key] = queue;
         }
 
         // Solve next and finalNext
-        for (let key in credits.queues) {
-            let value = credits.queues[key];
-            let queue = this.queues[key];
+        for (const key of Object.keys(credits.queues)) {
+            const value = credits.queues[key];
+            const queue = this.queues[key];
             if (value.next != null) {
                 queue.next = this.queues[value.next];
             }
@@ -139,48 +154,42 @@ export class SceneAnimator {
             }
         }
 
-        for (let key in this.queues) {
+        for (const key of Object.keys(this.queues)) {
             this.queueArray.push(this.queues[key]);
         }
         this.queueArray.sort((a, b) => a.layer - b.layer);
     }
 
-    public reset(): void {
-        for (let queue of this.queueArray)
-            queue.reset();
+    public reset() {
+        for (const queue of this.queueArray) queue.reset();
         this.doneTriggered = false;
     }
 
-    public abortPausePaths(): void {
-        for (let queue of this.queueArray)
-            queue.abortPausePaths();
+    public abortPausePaths() {
+        for (const queue of this.queueArray) queue.abortPausePaths();
     }
 
-    public update(delta: number): void {
+    public update(delta: number) {
         delta *= this.timeFactor;
         let done = true;
-        for (let queue of this.queueArray) {
+        for (const queue of this.queueArray) {
             queue.update(delta);
-            if (!queue.isDone())
-                done = false;
+            if (!queue.isDone()) done = false;
         }
         if (done) {
             if (!this.doneTriggered) {
                 this.doneTriggered = true;
-                for (let listener of this.listeners)
-                    listener.onSceneEnd();
+                for (const listener of this.listeners) listener.onSceneEnd();
             }
         }
     }
 
-    public addListener(listener: SceneAnimatorListener): void {
-        if (this.listeners.indexOf(listener) === -1)
-            this.listeners.push(listener);
+    public addListener(listener: SceneAnimatorListener) {
+        if (!this.listeners.includes(listener)) this.listeners.push(listener);
     }
 
-    public removeListener(listener: SceneAnimatorListener): void {
-        let index = this.listeners.indexOf(listener);
-        if (index !== -1)
-            this.listeners.splice(index, 1);
+    public removeListener(listener: SceneAnimatorListener) {
+        const index = this.listeners.indexOf(listener);
+        if (index !== -1) this.listeners.splice(index, 1);
     }
 }

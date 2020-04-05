@@ -5,7 +5,6 @@
  */
 
 import { MenuPage } from "./MenuPage";
-import { GameEvents } from "../GameEvents";
 import { SceneAnimator } from "../sceneanimator/SceneAnimator";
 import { creditsAnimation } from "../CreditsAnimation";
 import { MenuManager } from "./MenuManager";
@@ -14,23 +13,27 @@ import * as Music from "../Music";
 export class CreditsMenu extends MenuPage {
     private animator: SceneAnimator;
 
-    public constructor(manager: MenuManager, gameEvents: GameEvents) {
+    public constructor(manager: MenuManager) {
         super(manager);
 
-        this.addItem(500, 'Back', () => {
+        this.addItem(500, "Back", () => {
             this.popPage();
         });
         this.animator = new SceneAnimator(creditsAnimation, this.container);
-        this.animator.addListener({ onSceneEnd: () => { this.animator.reset(); } });
+        this.animator.addListener({
+            onSceneEnd: () => {
+                this.animator.reset();
+            },
+        });
     }
 
     public setVisible(visible: boolean) {
         super.setVisible(visible);
         if (visible) {
-            Music.fadeTo('outro');
+            Music.fadeTo("outro");
             this.animator.reset();
         } else {
-            Music.fadeTo('ambience');
+            Music.fadeTo("ambience");
         }
     }
 

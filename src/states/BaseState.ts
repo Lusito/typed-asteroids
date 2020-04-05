@@ -5,11 +5,14 @@
  */
 
 import { Container } from "pixi.js";
-import { StateManager } from "./StateManager";
+
+import type { StateManager } from "./StateManager";
 
 export class BaseState {
     manager: StateManager;
+
     protected container: Container;
+
     public constructor(manager: StateManager) {
         this.container = new Container();
         manager.getStage().addChild(this.container);
@@ -17,7 +20,7 @@ export class BaseState {
         this.manager = manager;
     }
 
-    public destroy(): void {
+    public destroy() {
         this.manager.removeState(this);
         this.container.destroy();
     }
@@ -26,10 +29,10 @@ export class BaseState {
         this.container.visible = visible;
     }
 
-    public isVisible(): boolean {
+    public isVisible() {
         return this.container.visible;
     }
 
-    public update(deltaTime: number): void {
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public update(_deltaTime: number) {}
 }

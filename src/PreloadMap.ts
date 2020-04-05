@@ -4,7 +4,7 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-export let PreloadMap: { [e: string]: string } = {
+export const PreloadMap: { [e: string]: string } = {
     background: "sprites/background.png",
     image_shield: "sprites/shield.png",
     image_thrust: "sprites/thrust.png",
@@ -34,5 +34,5 @@ export let PreloadMap: { [e: string]: string } = {
     menu_move: "sounds/menu_move.wav",
     menu_select: "sounds/menu_select.wav",
     lost: "sounds/lost.wav",
-    win: "sounds/win.wav"
+    win: "sounds/win.wav",
 };

@@ -4,17 +4,22 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
-import { Vec2 } from "../../Vec2";
 import { Text, TextStyle, TextMetrics, Container } from "pixi.js";
-import { TextAnimation } from "../SceneAnimatorJson";
-import { getDefault } from "../SceneAnimator";
+
+import { Vec2 } from "../../Vec2";
+import type { TextAnimation } from "../SceneAnimatorJSON";
+import { getDefault } from "../sceneAnimatorUtils";
 
 const bezierTemp = new Vec2();
 const bezierTempOut = new Vec2();
 
-function quadraticBezier(out: Vec2, t: number, p0: Vec2, p1: Vec2, p2: Vec2): Vec2 {
-    let dt = 1 - t;
-    return out.setFrom(p0).scale(dt * dt).add(bezierTemp.setFrom(p1).scale(2 * dt * t)).add(bezierTemp.setFrom(p2).scale(t * t));
+function quadraticBezier(out: Vec2, t: number, p0: Vec2, p1: Vec2, p2: Vec2) {
+    const dt = 1 - t;
+    return out
+        .setFrom(p0)
+        .scale(dt * dt)
+        .add(bezierTemp.setFrom(p1).scale(2 * dt * t))
+        .add(bezierTemp.setFrom(p2).scale(t * t));
 }
 
 function randomFloat(min: number, max: number) {
@@ -23,16 +28,28 @@ function randomFloat(min: number, max: number) {
 
 export class TextChar {
     private readonly text: Text;
-    private readonly start = new Vec2();
-    private readonly control = new Vec2();
-    private readonly end = new Vec2();
-    private animationTime: number = 0;
-    private startTime: number = 0;
 
-    public constructor(style: TextStyle, parent: Container, text: string, index: number, animation: TextAnimation, startTime: number, totalAnimationTime: number) {
+    private readonly start = new Vec2();
+
+    private readonly control = new Vec2();
+
+    private readonly end = new Vec2();
+
+    private animationTime = 0;
+
+    private startTime = 0;
+
+    public constructor(
+        style: TextStyle,
+        parent: Container,
+        text: string,
+        index: number,
+        animation: TextAnimation,
+        startTime: number
+    ) {
         this.startTime = startTime;
         if (index > 0) {
-            let bounds = TextMetrics.measureText(text.substr(0, index), style);
+            const bounds = TextMetrics.measureText(text.substr(0, index), style);
             this.end.x = bounds.width - style.strokeThickness;
         }
 
@@ -41,13 +58,16 @@ export class TextChar {
         this.text.visible = startTime <= 0;
         parent.addChild(this.text);
 
-        let angle = this.getRandomAngle(getDefault(animation, 'minAngle', 0), getDefault(animation, 'maxAngle', 360));
-        let radius = this.getRandomRadius(getDefault(animation, 'minRadius', 0), getDefault(animation, 'maxRadius', 50));
+        let angle = this.getRandomAngle(getDefault(animation, "minAngle", 0), getDefault(animation, "maxAngle", 360));
+        const radius = this.getRandomRadius(
+            getDefault(animation, "minRadius", 0),
+            getDefault(animation, "maxRadius", 50)
+        );
         this.start.setAngle(angle).scale(radius);
         this.start.x += this.end.x;
 
-        let minCurveAngle = getDefault(animation, 'minCurveAngle', 45);
-        let maxCurveAngle = getDefault(animation, 'maxCurveAngle', 135);
+        const minCurveAngle = getDefault(animation, "minCurveAngle", 45);
+        const maxCurveAngle = getDefault(animation, "maxCurveAngle", 135);
         if (Math.random() < 0.5) {
             angle += randomFloat(minCurveAngle, maxCurveAngle);
         } else {
@@ -66,9 +86,9 @@ export class TextChar {
         this.text.destroy();
     }
 
-    private getRandomRadius(minRadius: number, maxRadius: number): number {
+    private getRandomRadius(minRadius: number, maxRadius: number) {
         let radius;
-        if (minRadius == maxRadius) {
+        if (minRadius === maxRadius) {
             radius = minRadius;
         } else {
             radius = randomFloat(minRadius, maxRadius);
@@ -76,9 +96,9 @@ export class TextChar {
         return radius;
     }
 
-    private getRandomAngle(minAngle: number, maxAngle: number): number {
+    private getRandomAngle(minAngle: number, maxAngle: number) {
         let angle: number;
-        if (minAngle == maxAngle) {
+        if (minAngle === maxAngle) {
             angle = minAngle;
         } else if (minAngle < maxAngle) {
             angle = randomFloat(minAngle, maxAngle);
@@ -92,7 +112,7 @@ export class TextChar {
         return angle;
     }
 
-    public update(delta: number, totalAnimationTime: number): boolean {
+    public update(delta: number, totalAnimationTime: number) {
         if (this.startTime > 0) {
             this.startTime -= delta;
             if (this.startTime < 0) {
@@ -102,11 +122,10 @@ export class TextChar {
             }
         } else {
             this.animationTime += delta;
-            if (this.animationTime > totalAnimationTime)
-                this.animationTime = totalAnimationTime;
+            if (this.animationTime > totalAnimationTime) this.animationTime = totalAnimationTime;
         }
-        if (this.startTime == 0) {
-            let currentTime = this.animationTime / totalAnimationTime;
+        if (this.startTime === 0) {
+            const currentTime = this.animationTime / totalAnimationTime;
             quadraticBezier(bezierTempOut, currentTime, this.start, this.control, this.end);
             this.text.alpha = Math.min(1, currentTime * 2);
             this.text.scale.set(0.5 + currentTime * 0.5);
@@ -115,5 +134,4 @@ export class TextChar {
         }
         return this.animationTime >= totalAnimationTime;
     }
-
 }

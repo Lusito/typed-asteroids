@@ -4,29 +4,46 @@
  * @see https://github.com/Lusito/typed-asteroids
  */
 
+import { Container } from "pixi.js";
+
 import { Vec2, DEG_TO_RAD } from "../Vec2";
 import { Path } from "./Path";
-import { Animation } from "./SceneAnimatorJson";
-import { Container } from "pixi.js";
+import type { Animation } from "./SceneAnimatorJSON";
 import { getSound } from "../loader";
 
 const temp = new Vec2();
 
 export abstract class Item {
-
     public group: string;
+
     public path: Path | null = null;
+
     public startTime: number;
+
     public originalStartTime: number;
-    public pathTime: number = 0;
-    public animationTime: number = 0;
-    public totalAnimationTime: number = 0;
+
+    public pathTime = 0;
+
+    public animationTime = 0;
+
+    public totalAnimationTime = 0;
+
     public animations: Animation[] = [];
+
     public oriented: boolean;
+
     public readonly container: Container;
+
     private pausePath = 0;
 
-    public constructor(parent: Container, group: string, startTime: number, angle: number, oriented: boolean, opacity: number) {
+    public constructor(
+        parent: Container,
+        group: string,
+        startTime: number,
+        angle: number,
+        oriented: boolean,
+        opacity: number
+    ) {
         this.container = new Container();
         this.container.alpha = opacity;
         this.container.rotation = angle * DEG_TO_RAD;
@@ -42,34 +59,36 @@ export abstract class Item {
         this.container.destroy();
     }
 
-    public reset(animations: Animation[]): void {
+    public reset(animations: Animation[]) {
         this.animations = [];
-        animations.filter((anim) => this.isGroup(anim.group || "")).forEach((anim) => {
-            this.animations.push(anim);
-        });
+        animations
+            .filter((anim) => this.isGroup(anim.group ?? ""))
+            .forEach((anim) => {
+                this.animations.push(anim);
+            });
         this.startTime = this.originalStartTime;
         this.container.visible = this.startTime <= 0;
         this.pathTime = 0;
         this.pausePath = 0;
         this.animationTime = 0;
         this.totalAnimationTime = 0;
-        //Fixme: angle, opacity
+        // Fixme: angle, opacity
     }
 
-    public abortPausePath(): void {
+    public abortPausePath() {
         this.pausePath = 0;
     }
 
-    public setPosition(x: number, y: number): void {
+    public setPosition(x: number, y: number) {
         this.container.x = x;
         this.container.y = y;
     }
 
-    public setAngle(angle: number): void {
+    public setAngle(angle: number) {
         this.container.rotation = angle * DEG_TO_RAD;
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number) {
         if (this.startTime > 0) {
             this.startTime -= deltaTime;
             if (this.startTime < 0) {
@@ -78,7 +97,7 @@ export abstract class Item {
                 this.container.visible = true;
             }
         }
-        if (this.startTime == 0) {
+        if (this.startTime === 0) {
             if (this.pausePath < 0) {
                 return;
             }
@@ -95,12 +114,12 @@ export abstract class Item {
                 if (this.oriented) {
                     this.setAngle(this.path.derivativeAt(temp, this.pathTime).getAngle());
                 }
-                let p = this.path.valueAt(temp, this.pathTime);
+                const p = this.path.valueAt(temp, this.pathTime);
                 this.setPosition(p.x, p.y);
             }
 
             for (let i = this.animations.length - 1; i >= 0; i--) {
-                let animation = this.animations[i];
+                const animation = this.animations[i];
                 if (animation.time <= this.pathTime) {
                     this.startAnimation(animation);
                     this.animations.splice(i, 1);
@@ -109,15 +128,14 @@ export abstract class Item {
         }
     }
 
-    public isGroup(group: string): boolean {
+    public isGroup(group: string) {
         return group === "*" || this.group.toLowerCase() === group.toLowerCase();
     }
 
-    public startAnimation(animation: Animation): boolean {
+    public startAnimation(animation: Animation) {
         if (animation.type === "sound") {
-            let sound = getSound(animation.resource);
-            if (sound)
-                sound.play();
+            const sound = getSound(animation.resource);
+            if (sound) sound.play();
             return true;
         }
         if (animation.type === "path") {
@@ -131,18 +149,18 @@ export abstract class Item {
 
     public abstract isAnimationDone(): boolean;
 
-    public isDone(): boolean {
+    public isDone() {
         if (this.path == null) {
             return this.animations.length === 0 && this.isAnimationDone();
         }
         return this.pathTime > this.path.getTotalTime();
     }
 
-    public isStarted(): boolean {
+    public isStarted() {
         return this.startTime >= 0;
     }
 
-    public shouldRender(): boolean {
-        return this.startTime == 0 && (this.path == null || this.pathTime < this.path.getTotalTime());
+    public shouldRender() {
+        return this.startTime === 0 && (this.path == null || this.pathTime < this.path.getTotalTime());
     }
 }

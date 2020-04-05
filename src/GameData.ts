@@ -6,7 +6,9 @@
 
 export class GameData {
     playing = false;
+
     lifes = 5;
+
     level = 0; // i.e. not playing
 
     public reset() {

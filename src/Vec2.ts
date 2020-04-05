@@ -9,9 +9,10 @@ export const RAD_TO_DEG = 180 / Math.PI;
 
 export class Vec2 {
     x: number;
+
     y: number;
 
-    constructor(x: number = 0, y: number = 0) {
+    constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
@@ -37,7 +38,8 @@ export class Vec2 {
     }
 
     zero() {
-        this.x = this.y = 0;
+        this.x = 0;
+        this.y = 0;
         return this;
     }
 
@@ -60,18 +62,16 @@ export class Vec2 {
     }
 
     capLength(length: number) {
-        if (length <= 0)
-            this.zero();
+        if (length <= 0) this.zero();
         else {
-            let lenSqr = this.lengthSqr();
-            if (lenSqr > length * length)
-                this.scale(length / Math.sqrt(lenSqr));
+            const lenSqr = this.lengthSqr();
+            if (lenSqr > length * length) this.scale(length / Math.sqrt(lenSqr));
         }
     }
 
     normalize() {
-        let lenSqr = this.lengthSqr();
-        let lenInv = 1.0 / Math.sqrt(lenSqr);
+        const lenSqr = this.lengthSqr();
+        const lenInv = 1.0 / Math.sqrt(lenSqr);
 
         this.scale(lenInv);
         return this;
@@ -81,24 +81,21 @@ export class Vec2 {
         return this;
     }
 
-    equals(other: Vec2, epsilon: number = 0) {
+    equals(other: Vec2, epsilon = 0) {
         return epsilon === 0
-            ? (this.x === other.x && this.y === other.y)
-            : (Math.abs(this.x - other.x) <= epsilon && Math.abs(this.y - other.y) <= epsilon);
+            ? this.x === other.x && this.y === other.y
+            : Math.abs(this.x - other.x) <= epsilon && Math.abs(this.y - other.y) <= epsilon;
     }
 
     getAngle() {
-        if (this.isZero())
-            return 0.0;
+        if (this.isZero()) return 0.0;
         let angle = Math.atan2(this.y, this.x) * RAD_TO_DEG;
-        if (angle < 0.0)
-            angle += 360.0;
+        if (angle < 0.0) angle += 360.0;
         return angle;
-
     }
 
     setAngle(angle: number) {
-        let f = angle * DEG_TO_RAD;
+        const f = angle * DEG_TO_RAD;
         this.y = Math.sin(f);
         this.x = Math.cos(f);
         this.normalize();
@@ -136,8 +133,8 @@ export class Vec2 {
     }
 
     distanceTo(other: Vec2) {
-        let dx = other.x - this.x;
-        let dy = other.y - this.y;
+        const dx = other.x - this.x;
+        const dy = other.y - this.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 }
