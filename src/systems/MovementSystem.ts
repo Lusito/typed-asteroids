@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Entity, Family, IteratingSystem } from "typed-ecstasy";
 
 import { VelocityComponent, PositionComponent } from "../components";

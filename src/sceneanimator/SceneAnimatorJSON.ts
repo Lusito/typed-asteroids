@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { TextStyle } from "pixi.js";
 
 type TextStyleOptions = ConstructorParameters<typeof TextStyle>[0];

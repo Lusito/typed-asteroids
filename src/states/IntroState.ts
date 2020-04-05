@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { BaseState } from "./BaseState";
 import { StateManager } from "./StateManager";
 import { GameState } from "./GameState";

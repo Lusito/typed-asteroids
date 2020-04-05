@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Container } from "pixi.js";
 
 import { Vec2, DEG_TO_RAD } from "../Vec2";

@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { SceneAnimatorJSON } from "./sceneanimator/SceneAnimatorJSON";
 
 export const creditsAnimation: SceneAnimatorJSON = {

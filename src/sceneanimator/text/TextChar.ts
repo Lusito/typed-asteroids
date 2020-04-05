@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Text, TextStyle, TextMetrics, Container } from "pixi.js";
 
 import { Vec2 } from "../../Vec2";

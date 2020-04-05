@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Engine, Family, EntityFactory, EntityBlueprint, ComponentBlueprint } from "typed-ecstasy";
 import { Sprite } from "pixi.js";
 import { Key } from "ts-keycode-enum";

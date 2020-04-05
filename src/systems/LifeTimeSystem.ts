@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
 
 import { GameEvents } from "../GameEvents";

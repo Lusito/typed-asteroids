@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Container, Sprite } from "pixi.js";
 
 export class StateSpriteContainer extends Container {

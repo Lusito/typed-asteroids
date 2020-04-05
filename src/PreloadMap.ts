@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 export const PreloadMap: { [e: string]: string } = {
     background: "sprites/background.png",
     image_shield: "sprites/shield.png",

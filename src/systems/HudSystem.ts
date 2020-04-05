@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Engine, EntitySystem } from "typed-ecstasy";
 import { Text, Sprite, Container } from "pixi.js";
 

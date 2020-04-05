@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 // Set the name of the hidden property and the change event for visibility
 let hidden: string | null = null;
 let visibilityChange: string | null = null;

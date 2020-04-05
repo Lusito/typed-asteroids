@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Entity, Family, IteratingSystem, Engine } from "typed-ecstasy";
 import { Key } from "ts-keycode-enum";
 

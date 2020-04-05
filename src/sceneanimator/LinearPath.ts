@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Path } from "./Path";
 import { Vec2 } from "../Vec2";
 import { Destination } from "./Destination";

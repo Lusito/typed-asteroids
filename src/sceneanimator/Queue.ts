@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Item } from "./Item";
 import { Animation } from "./SceneAnimatorJSON";
 

@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Graphics, Text } from "pixi.js";
 
 import { BaseState } from "./BaseState";

@@ -1,9 +1,3 @@
-/**
- * License: zlib/libpng
- * @author Santo Pfingsten
- * @see https://github.com/Lusito/typed-asteroids
- */
-
 import { Entity, Family, Engine, EntitySystem } from "typed-ecstasy";
 import { SignalConnection } from "typed-signals";
 
