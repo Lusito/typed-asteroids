@@ -1,4 +1,4 @@
-export const PreloadMap: { [e: string]: string } = {
+export const preloadMap: { [e: string]: string } = {
     background: "sprites/background.png",
     image_shield: "sprites/shield.png",
     image_thrust: "sprites/thrust.png",

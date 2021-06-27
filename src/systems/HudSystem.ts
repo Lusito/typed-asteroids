@@ -1,9 +1,11 @@
-import { Engine, EntitySystem } from "typed-ecstasy";
+import { EntitySystem } from "typed-ecstasy";
 import { Text, Sprite, Container } from "pixi.js";
+import { Inject, Service } from "typedi";
+import { SignalConnections } from "typed-signals";
 
-import { GameEvents } from "../GameEvents";
-import { GameData } from "../GameData";
-import { getTexture } from "../loader";
+import { GameEvents } from "../services/GameEvents";
+import { GameData } from "../services/GameData";
+import { AssetLoader } from "../services/AssetLoader";
 
 const CENTER_TEXT_STYLE = {
     fontSize: 36,
@@ -21,38 +23,48 @@ const LEVEL_TEXT_STYLE = {
     stroke: "#000000",
     strokeThickness: 3,
 };
+
+@Service()
 export class HudSystem extends EntitySystem {
-    hudContainer: Container;
+    @Inject()
+    private readonly gameData!: GameData;
 
-    centerShowTime = 0;
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    gameData: GameData | null = null;
+    public readonly container = new Container();
 
-    gameEvents: GameEvents | null = null;
+    private readonly connections = new SignalConnections();
 
-    centerText: Text;
+    private hudContainer: Container | null = null;
 
-    levelText: Text;
+    private centerShowTime = 0;
 
-    level = 0;
+    private readonly centerText = new Text("", CENTER_TEXT_STYLE);
 
-    lifeSprites: Sprite[] = [];
+    private readonly levelText = new Text("Level: 1", LEVEL_TEXT_STYLE);
+
+    private level = 0;
+
+    private readonly lifeSprites: Sprite[] = [];
     // hud: life top left, level top right
     // messages all centered
 
-    constructor(container: Container) {
+    public constructor(assets: AssetLoader) {
         super();
+
+        const { container } = this;
         this.hudContainer = container.addChild(new Container());
         this.hudContainer.visible = false;
-        this.hudContainer.addChild((this.centerText = new Text("", CENTER_TEXT_STYLE)));
+        this.hudContainer.addChild(this.centerText);
         this.centerText.x = 400;
         this.centerText.y = 300;
         this.centerText.anchor.set(0.5);
-        this.hudContainer.addChild((this.levelText = new Text("Level: 1", LEVEL_TEXT_STYLE)));
+        this.hudContainer.addChild(this.levelText);
         this.levelText.anchor.set(1, 0);
         this.levelText.x = 800;
         this.levelText.y = 0;
-        const lifeTexture = getTexture("item_extralife");
+        const lifeTexture = assets.getTexture("item_extralife");
         for (let i = 0; i < 5; i++) {
             const sprite = new Sprite(lifeTexture);
             this.lifeSprites.push(this.hudContainer.addChild(sprite));
@@ -62,24 +74,28 @@ export class HudSystem extends EntitySystem {
     }
 
     public setVisible(visible: boolean) {
-        this.hudContainer.visible = visible;
+        if (this.hudContainer) this.hudContainer.visible = visible;
     }
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-        this.gameData = engine.lookup.get(GameData);
-        if (this.gameEvents) this.gameEvents.showCenterText.connect(this.showCenterText.bind(this)); // fixme: disconnect
+    protected override onEnable() {
+        this.connections.add(this.gameEvents.showCenterText.connect(this.showCenterText.bind(this)));
+
+        this.connections.add(
+            this.gameEvents.startGame.connect((forceRestart: boolean) => {
+                if (!this.gameData.playing || forceRestart) {
+                    this.showCenterText("", 0);
+                }
+                this.setVisible(true);
+            })
+        );
+        this.connections.add(this.gameEvents.gameWon.connect(() => this.setVisible(false)));
     }
 
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
-        this.gameEvents = null;
-        this.gameData = null;
+    protected override onDisable() {
+        this.connections.disconnectAll();
     }
 
-    public update(deltaTime: number) {
-        if (!this.gameData) return;
+    public override update(deltaTime: number) {
         for (let i = 0; i < 5; i++) {
             const sprite = this.lifeSprites[i];
             sprite.alpha = i < this.gameData.lifes ? 1 : 0.3;

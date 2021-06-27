@@ -1,7 +1,7 @@
-import { Engine, Family, EntityFactory, EntityBlueprint, ComponentBlueprint } from "typed-ecstasy";
-import { Sprite } from "pixi.js";
+import { Engine } from "typed-ecstasy";
 import { Key } from "ts-keycode-enum";
 import pixiSound from "pixi-sound";
+import Container from "typedi";
 
 import { BaseState } from "./BaseState";
 import { StateManager } from "./StateManager";
@@ -9,22 +9,20 @@ import { SpriteSystem } from "../systems/SpriteSystem";
 import { InputSystem } from "../systems/InputSystem";
 import { MovementSystem } from "../systems/MovementSystem";
 import { ItemSpawnSystem } from "../systems/ItemSpawnSystem";
-import { PossibleComponentDefs } from "../PossibleComponentDefs";
-import { componentFactories, SoundsComponent, PowerupComponent } from "../components";
-import * as Blueprints from "../Blueprints";
-import { GameEvents } from "../GameEvents";
+import { GameEvents } from "../services/GameEvents";
 import { ShootSystem } from "../systems/ShootSystem";
 import { LifeTimeSystem } from "../systems/LifeTimeSystem";
 import { DeathSystem } from "../systems/DeathSystem";
 import { CollisionSystem } from "../systems/CollisionSystem";
 import { ShieldSystem } from "../systems/ShieldSystem";
 import { HudSystem } from "../systems/HudSystem";
-import { GameData } from "../GameData";
-import { isVisible, onVisibilityChange } from "../Visibility";
+import { GameData } from "../services/GameData";
+import { VisibilityService } from "../services/VisibilityService";
 import { MainMenu } from "../menu/MainMenu";
-import * as Music from "../Music";
 import { MenuManager } from "../menu/MenuManager";
-import { getSound, getTexture } from "../loader";
+import { AssetLoader } from "../services/AssetLoader";
+import { MusicService } from "../services/MusicService";
+import { SoundSystem } from "../systems/SoundSystem";
 
 export class GameState extends BaseState {
     private menuManager!: MenuManager;
@@ -37,78 +35,53 @@ export class GameState extends BaseState {
 
     private inputSystem!: InputSystem;
 
-    private entityFactory!: EntityFactory;
-
     private gameData: GameData;
 
     private mainMenu!: MainMenu;
 
-    private engine: Engine;
+    private engine = new Engine();
 
-    protected readonly sounds: { [s: string]: pixiSound.Sound } = {
-        menu_open: getSound("menu_open"),
-        menu_close: getSound("menu_close"),
-    };
+    protected readonly sounds: { [s: string]: pixiSound.Sound } = {};
 
     public constructor(manager: StateManager) {
         super(manager);
-        Music.fadeTo("ambience");
+        const di = this.engine.getContainer();
+        const assets = di.get(AssetLoader);
+        this.sounds.menu_open = assets.getSound("menu_open");
+        this.sounds.menu_close = assets.getSound("menu_close");
 
-        this.container.addChild(new Sprite(getTexture("background")));
+        // Get game data, events
+        this.gameEvents = di.get(GameEvents);
+        this.gameData = di.get(GameData);
+
+        di.get(MusicService).fadeTo("ambience");
+
+        this.container.addChild(assets.createSprite("background"));
         this.container.alpha = 0;
 
-        this.engine = new Engine();
-        // Fixme: move to system
-        this.engine.getEntityAddedSignal(Family.all(SoundsComponent).get()).connect((e) => {
-            const c = e.get(SoundsComponent);
-            if (c?.spawn) c.spawn.play();
-        });
-
-        this.setupEntityFactory();
-
-        // Add game data, events and Systems
-        this.gameEvents = this.engine.lookup.put(GameEvents, new GameEvents());
-        this.gameData = this.engine.lookup.put(GameData, new GameData());
         this.addSystems();
-
-        this.gameEvents.powerupPickup.connect((player, powerup) => {
-            const pc = powerup.get(PowerupComponent);
-            if (pc) {
-                this.gameData.lifes = Math.min(5, this.gameData.lifes + pc.extraLifes);
-                const sc = powerup.get(SoundsComponent);
-                if (sc?.pickup) sc.pickup.play();
-            }
-        });
-
-        // Main menu:
         this.setupMainMenu();
-
-        // Key Handling
-        // fixme: addEventListener
-        window.onkeyup = this.onKeyUp.bind(this);
-        window.onkeydown = this.onKeyDown.bind(this);
-
+        this.registerKeyListeners();
         this.registerVisibleChange();
         this.showMenu(false);
     }
 
+    private registerKeyListeners() {
+        window.onkeyup = this.onKeyUp.bind(this);
+        window.onkeydown = this.onKeyDown.bind(this);
+    }
+
     private setupMainMenu() {
-        this.gameEvents.startGame.connect((forceRestart: boolean) => {
-            if (!this.gameData.playing || forceRestart) {
-                this.itemSpawnSystem.restart();
-                this.hudSystem.showCenterText("", 0);
-            }
-            this.menuManager.popAllPages();
-            this.hudSystem.setVisible(true);
-        });
+        this.gameEvents.startGame.connect(() => this.menuManager.popAllPages());
         this.gameEvents.gameWon.connect(() => {
             this.menuManager.popAllPages();
             this.menuManager.pushPage(this.mainMenu);
-            this.hudSystem.setVisible(false);
             this.mainMenu.showCredits();
         });
-        this.menuManager = new MenuManager(this.container);
-        this.mainMenu = new MainMenu(this.menuManager, this.gameEvents);
+        const di = this.engine.getContainer();
+        this.menuManager = di.get(MenuManager);
+        this.container.addChild(this.menuManager.container);
+        this.mainMenu = di.get(MainMenu);
         this.menuManager.emptyPop.connect(() => {
             if (!this.gameData.playing) this.menuManager.pushPage(this.mainMenu);
             else this.sounds.menu_close.play();
@@ -137,54 +110,28 @@ export class GameState extends BaseState {
     }
 
     private registerVisibleChange() {
-        if (!isVisible()) pixiSound.muteAll();
-        onVisibilityChange((visible) => {
-            if (visible) pixiSound.unmuteAll();
-            else {
-                pixiSound.muteAll();
-                if (!this.menuManager.isVisible()) this.showMenu();
-            }
+        Container.get(VisibilityService).onChange((visible) => {
+            if (!visible && !this.menuManager.isVisible()) this.showMenu();
         });
     }
 
     private addSystems() {
-        this.engine.addSystem(new SpriteSystem(this.container));
-        this.inputSystem = this.engine.addSystem(new InputSystem());
-        this.engine.addSystem(new MovementSystem());
-        this.itemSpawnSystem = this.engine.addSystem(new ItemSpawnSystem());
-        this.engine.addSystem(new ShootSystem());
-        this.engine.addSystem(new LifeTimeSystem());
-        this.engine.addSystem(new DeathSystem());
-        this.engine.addSystem(new CollisionSystem());
-        this.engine.addSystem(new ShieldSystem());
-        this.hudSystem = this.engine.addSystem(new HudSystem(this.container));
+        const spriteSystem = this.engine.systems.add(SpriteSystem);
+        this.container.addChild(spriteSystem.container);
+        this.inputSystem = this.engine.systems.add(InputSystem);
+        this.engine.systems.add(MovementSystem);
+        this.itemSpawnSystem = this.engine.systems.add(ItemSpawnSystem);
+        this.engine.systems.add(ShootSystem);
+        this.engine.systems.add(LifeTimeSystem);
+        this.engine.systems.add(DeathSystem);
+        this.engine.systems.add(CollisionSystem);
+        this.engine.systems.add(ShieldSystem);
+        this.hudSystem = this.engine.systems.add(HudSystem);
+        this.container.addChild(this.hudSystem.container);
+        this.engine.systems.add(SoundSystem);
     }
 
-    private setupEntityFactory() {
-        this.entityFactory = new EntityFactory();
-        // Setup component factories
-        for (const e of Object.keys(componentFactories)) {
-            this.entityFactory.addComponentFactory(e, componentFactories[e]);
-        }
-        this.engine.setEntityFactory(this.entityFactory);
-
-        for (const e of Object.keys(Blueprints)) this.addEntityBlueprint(e, (Blueprints as { [e: string]: any })[e]);
-    }
-
-    private addEntityBlueprint(name: string, componentDefs: PossibleComponentDefs[]) {
-        const entityBlueprint = new EntityBlueprint();
-
-        for (const componentDef of componentDefs) {
-            const cb = new ComponentBlueprint(componentDef.type);
-            for (const ckey of Object.keys(componentDef)) {
-                cb.set(ckey, componentDef[ckey as keyof PossibleComponentDefs]);
-            }
-            entityBlueprint.add(cb);
-        }
-        this.entityFactory.addEntityBlueprint(name, entityBlueprint);
-    }
-
-    public update(deltaTime: number) {
+    public override update(deltaTime: number) {
         if (this.container.alpha < 1) {
             this.container.alpha += deltaTime;
             if (this.container.alpha > 1) this.container.alpha = 1;

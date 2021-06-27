@@ -4,7 +4,7 @@ import { TextChar } from "../TextChar";
 import { TextEffect } from "./TextEffect";
 
 export class TextEffectConstruct extends TextEffect {
-    public prepare(item: TextItem, animation: TextAnimation) {
+    public override prepare(item: TextItem, animation: TextAnimation) {
         super.prepare(item, animation);
         item.chars = [];
         const constructType = animation.effect === "construct_type";
@@ -17,7 +17,7 @@ export class TextEffectConstruct extends TextEffect {
         item.text.text = "";
     }
 
-    public update(item: TextItem, deltaTime: number) {
+    public override update(item: TextItem, deltaTime: number) {
         for (let i = item.chars.length - 1; i >= 0; i--) {
             const tc = item.chars[i];
             if (tc.update(deltaTime, item.totalAnimationTime)) {

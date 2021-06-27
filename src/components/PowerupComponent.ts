@@ -1,11 +1,17 @@
-import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
+
+import { componentFactories } from "./componentFactories";
 
 export class PowerupComponent extends Component {
-    extraLifes = 0;
+    public extraLifes = 0;
 }
 
-export function powerupComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
-    const comp = entity.add(new PowerupComponent());
-    comp.extraLifes = blueprint.getNumber("extraLifes", 1);
-    return true;
-}
+export type PowerupConfig = {
+    extraLifes?: number;
+};
+
+componentFactories.add("Powerup", (obtain, blueprint) => {
+    const comp = obtain(PowerupComponent);
+    comp.extraLifes = blueprint.get("extraLifes", 1);
+    return comp;
+});

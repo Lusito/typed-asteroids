@@ -1,10 +1,12 @@
 import { Signal } from "typed-signals";
 import { Container } from "pixi.js";
+import { Service } from "typedi";
 
 import type { MenuPage } from "./MenuPage";
 
+@Service()
 export class MenuManager {
-    public readonly container: Container;
+    public readonly container = new Container();
 
     private currentPage: MenuPage | null = null;
 
@@ -13,11 +15,6 @@ export class MenuManager {
     private readonly pageStack: MenuPage[] = [];
 
     public readonly emptyPop = new Signal<() => void>();
-
-    public constructor(stage: Container) {
-        this.container = new Container();
-        stage.addChild(this.container);
-    }
 
     public register(page: MenuPage) {
         this.allPages.push(page);

@@ -1,14 +1,21 @@
+import { Service } from "typedi";
+
 import { MenuPage } from "./MenuPage";
 import { SceneAnimator } from "../sceneanimator/SceneAnimator";
-import { creditsAnimation } from "../CreditsAnimation";
+import { creditsAnimation } from "../sceneAnimations/creditsAnimation";
 import { MenuManager } from "./MenuManager";
-import * as Music from "../Music";
+import { AssetLoader } from "../services/AssetLoader";
+import { MusicService } from "../services/MusicService";
 
+@Service()
 export class CreditsMenu extends MenuPage {
     private animator: SceneAnimator;
 
-    public constructor(manager: MenuManager) {
-        super(manager);
+    private readonly music: MusicService;
+
+    public constructor(assets: AssetLoader, manager: MenuManager, music: MusicService) {
+        super(assets, manager);
+        this.music = music;
 
         this.addItem(500, "Back", () => {
             this.popPage();
@@ -21,17 +28,17 @@ export class CreditsMenu extends MenuPage {
         });
     }
 
-    public setVisible(visible: boolean) {
+    public override setVisible(visible: boolean) {
         super.setVisible(visible);
         if (visible) {
-            Music.fadeTo("outro");
+            this.music.fadeTo("outro");
             this.animator.reset();
         } else {
-            Music.fadeTo("ambience");
+            this.music.fadeTo("ambience");
         }
     }
 
-    public update(deltaTime: number) {
+    public override update(deltaTime: number) {
         this.animator.update(deltaTime);
     }
 }

@@ -3,8 +3,8 @@ import { Key } from "ts-keycode-enum";
 import pixiSound from "pixi-sound";
 
 import { MenuManager } from "./MenuManager";
-import { getSound } from "../loader";
 import { MenuItem } from "./MenuItem";
+import { AssetLoader } from "../services/AssetLoader";
 
 export class MenuPage {
     protected readonly manager: MenuManager;
@@ -15,16 +15,15 @@ export class MenuPage {
 
     protected items: MenuItem[] = [];
 
-    protected readonly sounds: { [s: string]: pixiSound.Sound } = {
-        menu_move: getSound("menu_move"),
-        menu_select: getSound("menu_select"),
-    };
+    protected readonly sounds: { [s: string]: pixiSound.Sound } = {};
 
-    public constructor(manager: MenuManager) {
+    public constructor(assets: AssetLoader, manager: MenuManager) {
+        this.sounds.menu_move = assets.getSound("menu_move");
+        this.sounds.menu_select = assets.getSound("menu_select");
         this.manager = manager;
         manager.container.addChild(this.container);
         manager.register(this);
-        this.setVisible(false);
+        this.container.visible = false;
     }
 
     public destroy() {

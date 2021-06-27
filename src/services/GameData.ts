@@ -1,3 +1,6 @@
+import { Service } from "typedi";
+
+@Service()
 export class GameData {
     playing = false;
 

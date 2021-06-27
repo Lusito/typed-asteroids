@@ -3,7 +3,7 @@ import { SpriteAnimation } from "../../SceneAnimatorJSON";
 import { SpriteEffect } from "./SpriteEffect";
 
 export class SpriteEffectShow extends SpriteEffect {
-    public prepare(item: SpriteItem, animation: SpriteAnimation) {
+    public override prepare(item: SpriteItem, animation: SpriteAnimation) {
         super.prepare(item, animation);
         item.container.visible = true;
     }

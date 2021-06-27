@@ -1,35 +1,25 @@
-import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
+import { IteratingSystem, Family, Entity } from "typed-ecstasy";
+import { Inject, Service } from "typedi";
 
-import { GameEvents } from "../GameEvents";
-import { ShieldComponent } from "../components";
+import { ShieldComponent } from "../components/ShieldComponent";
+import { GameEvents } from "../services/GameEvents";
 
+@Service()
 export class ShieldSystem extends IteratingSystem {
-    gameEvents: GameEvents | null = null;
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    constructor() {
+    public constructor() {
         super(Family.all(ShieldComponent).get());
     }
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-    }
-
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
-        this.gameEvents = null;
-    }
-
-    protected processEntity(entity: Entity, deltaTime: number) {
-        if (!this.gameEvents) return;
-        const ltc = entity.get(ShieldComponent);
-        if (ltc) {
-            ltc.lifeTime -= deltaTime;
-            if (ltc.lifeTime <= 0) {
-                entity.remove(ShieldComponent);
-                this.gameEvents.shieldDropped.emit(entity);
-                this.gameEvents.setStateSpriteVisible.emit(entity, "shield", false);
-            }
+    protected override processEntity(entity: Entity, deltaTime: number) {
+        const ltc = entity.require(ShieldComponent);
+        ltc.lifeTime -= deltaTime;
+        if (ltc.lifeTime <= 0) {
+            entity.remove(ShieldComponent);
+            this.gameEvents.shieldDropped.emit(entity);
+            this.gameEvents.setStateSpriteVisible.emit(entity, "shield", false);
         }
     }
 }

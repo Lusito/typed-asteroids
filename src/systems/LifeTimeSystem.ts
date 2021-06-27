@@ -1,31 +1,21 @@
-import { Engine, IteratingSystem, Family, Entity } from "typed-ecstasy";
+import { IteratingSystem, Family, Entity } from "typed-ecstasy";
+import { Inject, Service } from "typedi";
 
-import { GameEvents } from "../GameEvents";
-import { LifeTimeComponent } from "../components";
+import { LifeTimeComponent } from "../components/LifeTimeComponent";
+import { GameEvents } from "../services/GameEvents";
 
+@Service()
 export class LifeTimeSystem extends IteratingSystem {
-    gameEvents: GameEvents | null = null;
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    constructor() {
+    public constructor() {
         super(Family.all(LifeTimeComponent).get());
     }
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-    }
-
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
-        this.gameEvents = null;
-    }
-
-    protected processEntity(entity: Entity, deltaTime: number) {
-        if (!this.gameEvents) return;
-        const ltc = entity.get(LifeTimeComponent);
-        if (ltc) {
-            ltc.lifeTime -= deltaTime;
-            if (ltc.lifeTime <= 0) this.gameEvents.death.emit(entity);
-        }
+    protected override processEntity(entity: Entity, deltaTime: number) {
+        const ltc = entity.require(LifeTimeComponent);
+        ltc.lifeTime -= deltaTime;
+        if (ltc.lifeTime <= 0) this.gameEvents.death.emit(entity);
     }
 }

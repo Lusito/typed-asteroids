@@ -1,17 +1,23 @@
-import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
 
+import { componentFactories } from "./componentFactories";
 import { Vec2 } from "../Vec2";
 
 export class VelocityComponent extends Component {
-    dir = new Vec2();
+    public readonly dir = new Vec2();
 
-    rotation = 0.0;
+    public rotation = 0.0;
 }
 
-export function velocityComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
-    const comp = new VelocityComponent();
-    comp.dir.set(blueprint.getNumber("x", 0), blueprint.getNumber("y", 0));
-    comp.rotation = blueprint.getNumber("rotation", 0);
-    entity.add(comp);
-    return true;
-}
+export type VelocityConfig = {
+    x?: number;
+    y?: number;
+    rotation?: number;
+};
+
+componentFactories.add("Velocity", (obtain, blueprint) => {
+    const comp = obtain(VelocityComponent);
+    comp.dir.set(blueprint.get("x", 0), blueprint.get("y", 0));
+    comp.rotation = blueprint.get("rotation", 0);
+    return comp;
+});

@@ -1,16 +1,18 @@
 import { Entity, Family, IteratingSystem } from "typed-ecstasy";
+import { Service } from "typedi";
 
-import { VelocityComponent, PositionComponent } from "../components";
+import { PositionComponent } from "../components/PositionComponent";
+import { VelocityComponent } from "../components/VelocityComponent";
 
+@Service()
 export class MovementSystem extends IteratingSystem {
-    constructor() {
+    public constructor() {
         super(Family.all(PositionComponent, VelocityComponent).get());
     }
 
-    protected processEntity(entity: Entity, deltaTime: number) {
-        const vc = entity.get(VelocityComponent);
-        const pc = entity.get(PositionComponent);
-        if (!vc || !pc) return;
+    protected override processEntity(entity: Entity, deltaTime: number) {
+        const vc = entity.require(VelocityComponent);
+        const pc = entity.require(PositionComponent);
 
         pc.position.x += vc.dir.x * deltaTime;
         pc.position.y += vc.dir.y * deltaTime;

@@ -1,23 +1,29 @@
-import { Entity, Family, IteratingSystem, Engine } from "typed-ecstasy";
+import { Entity, Family, IteratingSystem } from "typed-ecstasy";
 import { Key } from "ts-keycode-enum";
+import { Inject, Service } from "typedi";
 
-import { InputComponent, PositionComponent, VelocityComponent, PlayerComponent } from "../components";
 import { Vec2 } from "../Vec2";
-import { GameEvents } from "../GameEvents";
+import { GameEvents } from "../services/GameEvents";
+import { InputComponent } from "../components/InputComponent";
+import { PositionComponent } from "../components/PositionComponent";
+import { VelocityComponent } from "../components/VelocityComponent";
+import { PlayerComponent } from "../components/PlayerComponent";
 
+@Service()
 export class InputSystem extends IteratingSystem {
     private readonly keys = new Array(256);
 
     private readonly dir = new Vec2();
 
-    private gameEvents: GameEvents | null = null;
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    constructor() {
+    public constructor() {
         super(Family.all(InputComponent, PositionComponent, VelocityComponent, PlayerComponent).get());
     }
 
     public onKeyDown(e: KeyboardEvent) {
-        if (e.keyCode === Key.Space && this.gameEvents && !this.keys[Key.Space]) this.gameEvents.shoot.emit();
+        if (e.keyCode === Key.Space && !this.keys[Key.Space]) this.gameEvents.shoot.emit();
         if (e.keyCode < this.keys.length) this.keys[e.keyCode] = true;
     }
 
@@ -25,21 +31,10 @@ export class InputSystem extends IteratingSystem {
         if (e.keyCode < this.keys.length) this.keys[e.keyCode] = false;
     }
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-    }
-
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
-        this.gameEvents = null;
-    }
-
-    protected processEntity(entity: Entity, deltaTime: number) {
-        const pc = entity.get(PositionComponent);
-        const plc = entity.get(PlayerComponent);
-        const vc = entity.get(VelocityComponent);
-        if (!pc || !vc || !plc || !this.gameEvents) return;
+    protected override processEntity(entity: Entity, deltaTime: number) {
+        const pc = entity.require(PositionComponent);
+        const plc = entity.require(PlayerComponent);
+        const vc = entity.require(VelocityComponent);
         let accelScale = 0;
         let turnScale = 0;
         if (this.keys[Key.RightArrow]) turnScale += 1;

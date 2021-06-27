@@ -1,17 +1,27 @@
-import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
+
+import { componentFactories } from "./componentFactories";
+
+export type PhysicsGroup = "blast" | "player" | "asteroid" | "powerup";
 
 export class PhysicsComponent extends Component {
-    radius = 0;
+    public radius = 0;
 
-    group = "";
+    public group: PhysicsGroup = "asteroid";
 
-    collidesWith: string[] = [];
+    public collidesWith: PhysicsGroup[] = [];
 }
 
-export function physicsComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
-    const comp = entity.add(new PhysicsComponent());
-    comp.radius = blueprint.getNumber("radius", 0);
-    comp.group = blueprint.getString("group", "");
-    comp.collidesWith = blueprint.getString("collidesWith", "").split(",");
-    return true;
-}
+export type PhysicsConfig = {
+    radius: number;
+    group: PhysicsGroup;
+    collidesWith?: PhysicsGroup[];
+};
+
+componentFactories.add("Physics", (obtain, blueprint) => {
+    const comp = obtain(PhysicsComponent);
+    comp.radius = blueprint.get("radius", 0);
+    comp.group = blueprint.get("group", "asteroid");
+    comp.collidesWith = blueprint.get("collidesWith", []);
+    return comp;
+});

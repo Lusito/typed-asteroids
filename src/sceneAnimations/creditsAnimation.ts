@@ -1,4 +1,4 @@
-import { SceneAnimatorJSON } from "./sceneanimator/SceneAnimatorJSON";
+import { SceneAnimatorJSON } from "../sceneanimator/SceneAnimatorJSON";
 
 export const creditsAnimation: SceneAnimatorJSON = {
     textStyles: {

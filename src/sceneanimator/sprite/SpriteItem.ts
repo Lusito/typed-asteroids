@@ -2,7 +2,6 @@ import { Sprite, Container } from "pixi.js";
 
 import { Item } from "../Item";
 import { Animation } from "../SceneAnimatorJSON";
-import { getTexture } from "../../loader";
 import { SpriteEffectFadeIn } from "./effects/SpriteEffectFadeIn";
 import { SpriteEffectFadeOut } from "./effects/SpriteEffectFadeOut";
 import { SpriteEffectScaleIn } from "./effects/SpriteEffectScaleIn";
@@ -10,6 +9,7 @@ import { SpriteEffectScaleOut } from "./effects/SpriteEffectScaleOut";
 import { SpriteEffectHide } from "./effects/SpriteEffectHide";
 import { SpriteEffectShow } from "./effects/SpriteEffectShow";
 import { SpriteEffect } from "./effects/SpriteEffect";
+import { AssetLoader } from "../../services/AssetLoader";
 
 const spriteEffectMap: { [s: string]: SpriteEffect } = {
     fade_in: new SpriteEffectFadeIn(),
@@ -30,6 +30,7 @@ export class SpriteItem extends Item {
     public effect: SpriteEffect | null = null;
 
     public constructor(
+        assets: AssetLoader,
         parent: Container,
         type: string,
         group: string,
@@ -40,7 +41,7 @@ export class SpriteItem extends Item {
         opacity: number,
         resource: string
     ) {
-        super(parent, group, startTime, 0, oriented, opacity);
+        super(assets, parent, group, startTime, 0, oriented, opacity);
         this.angleAdd = angle;
         this.scale = scale;
         this.container.scale.set(scale);
@@ -57,7 +58,7 @@ export class SpriteItem extends Item {
 
         // this.animation = null;
         if (type === "sprite") {
-            const texture = getTexture(resourceName);
+            const texture = this.assets.getTexture(resourceName);
             if (texture) {
                 this.sprite = new Sprite(texture);
                 this.sprite.anchor.set(0.5);
@@ -70,11 +71,11 @@ export class SpriteItem extends Item {
         }
     }
 
-    public setAngle(angle: number) {
+    public override setAngle(angle: number) {
         super.setAngle(angle + this.angleAdd);
     }
 
-    public update(deltaTime: number) {
+    public override update(deltaTime: number) {
         super.update(deltaTime);
 
         this.animationTime += deltaTime;
@@ -84,7 +85,7 @@ export class SpriteItem extends Item {
         }
     }
 
-    public startAnimation(animation: Animation) {
+    public override startAnimation(animation: Animation) {
         if (super.startAnimation(animation) || animation.type !== "sprite") return true;
         if (animation.effect) {
             this.effect = spriteEffectMap[animation.effect] || null;
@@ -100,7 +101,7 @@ export class SpriteItem extends Item {
         return this.effect == null && this.animationTime > this.totalAnimationTime;
     }
 
-    public reset(animations: Animation[]) {
+    public override reset(animations: Animation[]) {
         super.reset(animations);
 
         // this.setSprite(this.originalResource);

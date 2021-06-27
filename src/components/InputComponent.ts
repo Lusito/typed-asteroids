@@ -1,8 +1,9 @@
-import { Component, Entity } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
+
+import { componentFactories } from "./componentFactories";
 
 export class InputComponent extends Component {}
 
-export function inputComponentFactory(entity: Entity) {
-    entity.add(new InputComponent());
-    return true;
-}
+export type InputConfig = Record<string, never>;
+
+componentFactories.add("Input", (obtain) => obtain(InputComponent));

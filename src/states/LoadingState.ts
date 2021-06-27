@@ -1,10 +1,11 @@
 import { Graphics, Text } from "pixi.js";
+import Container from "typedi";
 
 import { BaseState } from "./BaseState";
 import { StateManager } from "./StateManager";
-import { PreloadMap } from "../PreloadMap";
+import { preloadMap } from "../preloadMap";
 import { IntroState } from "./IntroState";
-import { getProgress, addOnProgress, addOnCompleteOnce, preload, startLoading } from "../loader";
+import { AssetLoader } from "../services/AssetLoader";
 
 const TEXT_STYLE = {
     fontSize: 24,
@@ -30,21 +31,22 @@ export class LoadingState extends BaseState {
         this.text.anchor.set(0.5);
         this.container.addChild(this.text);
 
+        const assets = Container.get(AssetLoader);
         const onProgress = () => {
-            this.setProgress(getProgress() / 100);
+            this.setProgress(assets.getProgress() / 100);
         };
-        const detachOnProgress = addOnProgress(onProgress);
-        addOnCompleteOnce(() => {
+        const detachOnProgress = assets.addOnProgress(onProgress);
+        assets.addOnCompleteOnce(() => {
             detachOnProgress();
             // eslint-disable-next-line no-new
             new IntroState(manager);
             this.destroy();
         });
 
-        for (const key of Object.keys(PreloadMap)) {
-            preload(key, PreloadMap[key]);
+        for (const key of Object.keys(preloadMap)) {
+            assets.preload(key, preloadMap[key]);
         }
-        startLoading();
+        assets.startLoading();
     }
 
     private setProgress(pct: number) {

@@ -11,6 +11,7 @@ import { TextEffectType } from "./effects/TextEffectType";
 import { TextEffectTypeInstant } from "./effects/TextEffectTypeInstant";
 import { TextEffectUntype } from "./effects/TextEffectUntype";
 import { TextEffectUntypeInstant } from "./effects/TextEffectUntypeInstant";
+import { AssetLoader } from "../../services/AssetLoader";
 
 const textEffectMap: { [s: string]: TextEffect } = {
     fade_in: new TextEffectFadeIn(),
@@ -37,6 +38,7 @@ export class TextItem extends Item {
     public effect: TextEffect | null = null;
 
     public constructor(
+        assets: AssetLoader,
         parent: Container,
         group: string,
         startTime: number,
@@ -45,7 +47,7 @@ export class TextItem extends Item {
         text: string,
         style: TextStyle
     ) {
-        super(parent, group, startTime, angle, false, opacity);
+        super(assets, parent, group, startTime, angle, false, opacity);
         this.originalText = text;
         this.text = new Text(text, style);
         this.container.addChild(this.text);
@@ -62,7 +64,7 @@ export class TextItem extends Item {
         }
     }
 
-    public reset(animations: Animation[]) {
+    public override reset(animations: Animation[]) {
         super.reset(animations);
 
         for (const ch of this.chars) ch.destroy();
@@ -71,11 +73,11 @@ export class TextItem extends Item {
         this.effect = null;
     }
 
-    public setPosition(x: number, y: number) {
+    public override setPosition(x: number, y: number) {
         super.setPosition(x + this.xOffset, y);
     }
 
-    public update(delta: number) {
+    public override update(delta: number) {
         super.update(delta);
 
         if (this.startTime === 0) {
@@ -84,7 +86,7 @@ export class TextItem extends Item {
         }
     }
 
-    public startAnimation(animation: Animation) {
+    public override startAnimation(animation: Animation) {
         if (super.startAnimation(animation) || animation.type !== "text") return true;
         this.effect = textEffectMap[animation.effect] || null;
         if (this.effect) this.effect.prepare(this, animation);

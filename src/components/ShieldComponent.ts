@@ -1,11 +1,17 @@
-import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
+
+import { componentFactories } from "./componentFactories";
 
 export class ShieldComponent extends Component {
-    lifeTime = 0;
+    public lifeTime = 0;
 }
 
-export function shieldComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
-    const comp = entity.add(new ShieldComponent());
-    comp.lifeTime = blueprint.getNumber("lifeTime", 0);
-    return true;
-}
+export type ShieldConfig = {
+    lifeTime: number;
+};
+
+componentFactories.add("Shield", (obtain, blueprint) => {
+    const comp = obtain(ShieldComponent);
+    comp.lifeTime = blueprint.get("lifeTime", 0);
+    return comp;
+});

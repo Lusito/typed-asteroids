@@ -1,9 +1,11 @@
 import { Text } from "pixi.js";
+import { Service } from "typedi";
 
 import { MenuPage } from "./MenuPage";
-import { GameEvents } from "../GameEvents";
+import { GameEvents } from "../services/GameEvents";
 import { MenuManager } from "./MenuManager";
 import { CreditsMenu } from "./CreditsMenu";
+import { AssetLoader } from "../services/AssetLoader";
 
 const TITLE_TEXT_STYLE = {
     fontSize: 36,
@@ -23,12 +25,13 @@ const HINT_TEXT_STYLE = {
     strokeThickness: 3,
 };
 
+@Service()
 export class MainMenu extends MenuPage {
     private readonly creditsMenu: CreditsMenu;
 
-    public constructor(manager: MenuManager, gameEvents: GameEvents) {
-        super(manager);
-        this.creditsMenu = new CreditsMenu(manager);
+    public constructor(assets: AssetLoader, manager: MenuManager, gameEvents: GameEvents, creditsMenu: CreditsMenu) {
+        super(assets, manager);
+        this.creditsMenu = creditsMenu;
 
         const text = this.container.addChild(new Text("Lusito's Asteroids Clone!", TITLE_TEXT_STYLE));
         text.anchor.set(0);

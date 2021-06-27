@@ -3,12 +3,12 @@ import { SpriteAnimation } from "../../SceneAnimatorJSON";
 import { SpriteEffect } from "./SpriteEffect";
 
 export class SpriteEffectScaleOut extends SpriteEffect {
-    public prepare(item: SpriteItem, animation: SpriteAnimation) {
+    public override prepare(item: SpriteItem, animation: SpriteAnimation) {
         super.prepare(item, animation);
         item.container.scale.set(0);
     }
 
-    public update(item: SpriteItem) {
+    public override update(item: SpriteItem) {
         const scale = 1 - item.animationTime / item.totalAnimationTime;
         item.container.scale.set(scale * item.scale);
         if (scale <= 0) {

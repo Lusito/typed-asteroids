@@ -1,17 +1,17 @@
 import { SignalConnections } from "typed-signals";
-import { Engine, Family, Entity, EntitySystem } from "typed-ecstasy";
+import { Family, Entity, EntitySystem, Allocator } from "typed-ecstasy";
+import { Inject, Service } from "typedi";
 
 import { Vec2 } from "../Vec2";
-import { GameEvents } from "../GameEvents";
-import {
-    PlayerComponent,
-    LifeTimeComponent,
-    PositionComponent,
-    PhysicsComponent,
-    ShieldComponent,
-} from "../components";
-import { GameData } from "../GameData";
-import { getSound } from "../loader";
+import { GameEvents } from "../services/GameEvents";
+import { GameData } from "../services/GameData";
+import { PlayerComponent } from "../components/PlayerComponent";
+import { LifeTimeComponent } from "../components/LifeTimeComponent";
+import { PositionComponent } from "../components/PositionComponent";
+import { PhysicsComponent } from "../components/PhysicsComponent";
+import { ShieldComponent } from "../components/ShieldComponent";
+import { AsteroidsEntityFactory } from "../services/AsteroidsEntityFactory";
+import { AssetLoader } from "../services/AssetLoader";
 
 const levelAsteroidCounts = [
     [2, 3, 4],
@@ -37,77 +37,82 @@ export type SpawnRandomEntitiesConfig = {
 
 const screenCenter = new Vec2(400, 300);
 
+@Service()
 export class ItemSpawnSystem extends EntitySystem {
-    nextExtraLife = -1;
+    @Inject()
+    private readonly allocator!: Allocator;
 
-    gameEvents: GameEvents | null = null;
+    @Inject()
+    private readonly entityFactory!: AsteroidsEntityFactory;
 
-    gameData: GameData | null = null;
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    respawnPlayer = 0.1;
+    @Inject()
+    private readonly gameData!: GameData;
 
-    players: Entity[] | null = null;
-
-    enemies: Entity[] | null = null;
+    @Inject()
+    private readonly assets!: AssetLoader;
 
     private readonly connections = new SignalConnections();
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-        if (this.gameEvents) {
-            this.connections.add(this.gameEvents.spawnEntity.connect(this.spawnEntity.bind(this)));
-            this.connections.add(this.gameEvents.spawnRandomEntities.connect(this.spawnRandomEntities.bind(this)));
-        }
-        this.gameData = engine.lookup.get(GameData);
-        this.players = engine.getEntitiesFor(Family.all(PlayerComponent).get());
-        this.enemies = engine.getEntitiesFor(Family.exclude(PlayerComponent, LifeTimeComponent).get());
+    private nextExtraLife = -1;
+
+    private respawnPlayer = 0.1;
+
+    private players!: Entity[];
+
+    private enemies!: Entity[];
+
+    protected override onEnable() {
+        this.connections.add(this.gameEvents.spawnEntity.connect(this.spawnEntity.bind(this)));
+        this.connections.add(this.gameEvents.spawnRandomEntities.connect(this.spawnRandomEntities.bind(this)));
+        this.connections.add(
+            this.gameEvents.startGame.connect((forceRestart: boolean) => {
+                if (!this.gameData.playing || forceRestart) this.restart();
+            })
+        );
+        this.players = this.engine.entities.forFamily(
+            Family.all(PlayerComponent, PositionComponent, PhysicsComponent).get()
+        );
+        this.enemies = this.engine.entities.forFamily(Family.exclude(PlayerComponent, LifeTimeComponent).get());
     }
 
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
+    protected override onDisable() {
         this.connections.disconnectAll();
-        this.gameEvents = null;
-        this.gameData = null;
-        this.players = null;
-        this.enemies = null;
     }
 
-    public restart() {
-        const engine = this.getEngine();
-        if (!this.gameData || !engine) return;
+    private restart() {
         this.respawnPlayer = 0.1;
         this.gameData.reset();
         this.gameData.playing = true;
-        engine.removeAllEntities();
+        this.engine.entities.removeAll();
         this.nextExtraLife = 5 + Math.random() * 10;
     }
 
-    public update(deltaTime: number) {
-        if (!this.gameData || !this.gameEvents) return;
+    public override update(deltaTime: number) {
         if (!this.gameData.playing) {
-            if (this.enemies && this.enemies.length === 0) this.respawnAsteroids(screenCenter, 25, 3);
-        } else if (this.gameData.lifes > 0 && this.players) {
+            if (this.enemies.length === 0) this.respawnAsteroids(screenCenter, 25, 3);
+        } else if (this.gameData.lifes > 0) {
             if (this.players.length === 0) {
                 if (this.respawnPlayer <= 0) this.respawnPlayer = 5;
                 else {
                     this.respawnPlayer -= deltaTime;
                     if (this.respawnPlayer <= 0) this.spawnEntity("player", { Position: { x: 400, y: 300 } });
                 }
-            } else if (this.enemies && this.enemies.length === 0) {
+            } else if (this.enemies.length === 0) {
                 if (this.gameData.level >= levelAsteroidCounts.length) {
-                    getSound("win").play();
+                    this.assets.getSound("win").play();
                     this.gameEvents.gameWon.emit();
                     this.stop(true);
                     return;
                 }
                 const player = this.players[0];
-                const pc = player.get(PositionComponent);
-                const phc = player.get(PhysicsComponent);
-                const plc = player.get(PlayerComponent);
-                if (!pc || !phc || !plc) return;
+                const pc = player.require(PositionComponent);
+                const phc = player.require(PhysicsComponent);
+                const plc = player.require(PlayerComponent);
                 if (!player.has(ShieldComponent)) {
-                    player.add(new ShieldComponent()).lifeTime = plc.spawnProtection;
+                    player.add(this.allocator.obtainComponent(ShieldComponent)).lifeTime = plc.spawnProtection;
                     this.gameEvents.setStateSpriteVisible.emit(player, "shield", true);
                 }
                 const origin = pc.position;
@@ -120,8 +125,7 @@ export class ItemSpawnSystem extends EntitySystem {
                 this.nextExtraLife -= deltaTime;
                 if (this.nextExtraLife <= 0) {
                     const player = this.players[0];
-                    const pc = player.get(PositionComponent);
-                    if (!pc) return;
+                    const pc = player.require(PositionComponent);
                     const origin = pc.position;
                     this.spawnRandomEntities({
                         classname: "item_extralife",
@@ -143,30 +147,27 @@ export class ItemSpawnSystem extends EntitySystem {
     }
 
     public stop(spawnFireworks = false) {
-        const engine = this.getEngine();
-        if (this.gameData && engine) {
-            engine.removeAllEntities();
-            this.gameData.playing = false;
-            this.nextExtraLife = 5 + Math.random() * 10;
-            if (spawnFireworks) {
-                const radius = 50;
-                this.spawnRandomEntities(
-                    {
-                        classname: "firework",
-                        origin: screenCenter,
-                        count: 50,
-                        minDist: radius + 100,
-                        maxDist: radius + 300,
-                        minSpeed: 50,
-                        maxSpeed: 100,
-                        maxRot: 0,
-                        spreadPct: 0.7,
-                        radial: true,
-                        alignAngle: true,
-                    },
-                    5
-                );
-            }
+        this.engine.entities.removeAll();
+        this.gameData.playing = false;
+        this.nextExtraLife = 5 + Math.random() * 10;
+        if (spawnFireworks) {
+            const radius = 50;
+            this.spawnRandomEntities(
+                {
+                    classname: "firework",
+                    origin: screenCenter,
+                    count: 50,
+                    minDist: radius + 100,
+                    maxDist: radius + 300,
+                    minSpeed: 50,
+                    maxSpeed: 100,
+                    maxRot: 0,
+                    spreadPct: 0.7,
+                    radial: true,
+                    alignAngle: true,
+                },
+                5
+            );
         }
     }
 
@@ -214,11 +215,8 @@ export class ItemSpawnSystem extends EntitySystem {
     }
 
     public spawnEntity(blueprintname: string, overrides?: { [s: string]: { [s: string]: any } }) {
-        const engine = this.getEngine();
-        if (engine) {
-            const entity = engine.assembleEntity(blueprintname, overrides);
-            if (entity) engine.addEntity(entity);
-        }
+        const entity = this.entityFactory.assemble(blueprintname, overrides);
+        if (entity) this.engine.entities.add(entity);
     }
 
     private spawnRandomEntities(config: SpawnRandomEntitiesConfig, randomLife?: number) {

@@ -1,17 +1,29 @@
-import { Entity, Family, IteratingSystem, Engine } from "typed-ecstasy";
+import { Entity, Family, IteratingSystem } from "typed-ecstasy";
 import { Container } from "pixi.js";
+import { Inject, Service } from "typedi";
+import { SignalConnections } from "typed-signals";
 
-import { SpriteComponent, PositionComponent } from "../components";
 import { DEG_TO_RAD } from "../Vec2";
 import { StateSpriteContainer } from "../StateSpriteContainer";
-import { GameEvents } from "../GameEvents";
+import { GameEvents } from "../services/GameEvents";
+import { SpriteComponent } from "../components/SpriteComponent";
+import { PositionComponent } from "../components/PositionComponent";
 
+@Service()
 export class SpriteSystem extends IteratingSystem {
-    private readonly layers: { [e: string]: Container };
+    @Inject()
+    private readonly gameEvents!: GameEvents;
 
-    constructor(container: Container) {
+    public readonly container = new Container();
+
+    private layers!: { [e: string]: Container };
+
+    private readonly connections = new SignalConnections();
+
+    public constructor() {
         super(Family.all(SpriteComponent, PositionComponent).get());
 
+        const { container } = this;
         this.layers = {
             big_asteroids: container.addChild(new Container()),
             medium_asteroids: container.addChild(new Container()),
@@ -23,39 +35,33 @@ export class SpriteSystem extends IteratingSystem {
         };
     }
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
+    protected override onEnable() {
+        super.onEnable();
+        this.connections.add(this.gameEvents.setStateSpriteVisible.connect(this.setStateSpriteVisible.bind(this)));
 
-        const gameEvents = engine.lookup.get(GameEvents);
-        if (gameEvents) gameEvents.setStateSpriteVisible.connect(this.setStateSpriteVisible.bind(this));
-
-        engine.getEntityAddedSignal(Family.all(SpriteComponent).get()).connect((e) => {
-            const c = e.get(SpriteComponent);
-            if (c) {
-                const layer = (c.layer && this.layers[c.layer]) || this.layers.big_asteroids;
-                for (const sprite of c.sprites) layer.addChild(sprite);
-            }
+        this.engine.entities.onAddForFamily(Family.all(SpriteComponent).get()).connect((e) => {
+            const c = e.require(SpriteComponent);
+            const layer = (c.layer && this.layers[c.layer]) || this.layers.big_asteroids;
+            for (const sprite of c.sprites) layer.addChild(sprite);
         });
-        engine.getEntityRemovedSignal(Family.all(SpriteComponent).get()).connect((e) => {
-            const c = e.get(SpriteComponent);
-            if (c) {
-                const layer = (c.layer && this.layers[c.layer]) || this.layers.big_asteroids;
-                for (const sprite of c.sprites) {
-                    layer.removeChild(sprite);
-                    sprite.destroy();
-                }
+        this.engine.entities.onRemoveForFamily(Family.all(SpriteComponent).get()).connect((e) => {
+            const c = e.require(SpriteComponent);
+            const layer = (c.layer && this.layers[c.layer]) || this.layers.big_asteroids;
+            for (const sprite of c.sprites) {
+                layer.removeChild(sprite);
+                sprite.destroy();
             }
         });
     }
 
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
+    protected override onDisable() {
+        super.onDisable();
+        this.connections.disconnectAll();
     }
 
-    protected processEntity(entity: Entity, deltaTime: number) {
-        const sc = entity.get(SpriteComponent);
-        const pc = entity.get(PositionComponent);
-        if (!sc || !pc) return;
+    protected override processEntity(entity: Entity, deltaTime: number) {
+        const sc = entity.require(SpriteComponent);
+        const pc = entity.require(PositionComponent);
         if (sc.popTime > 0) {
             sc.popTime -= deltaTime;
             if (sc.popTime < 0) sc.popTime = 0;

@@ -1,20 +1,29 @@
-import { Component, Entity, ComponentBlueprint } from "typed-ecstasy";
+import { Component } from "typed-ecstasy";
+
+import { componentFactories } from "./componentFactories";
 
 export class PlayerComponent extends Component {
-    acceleration = 0;
+    public acceleration = 0;
 
-    maxSpeed = 0;
+    public maxSpeed = 0;
 
-    spawnProtection = 0;
+    public spawnProtection = 0;
 
-    spawnProtectionFade = 0;
+    public spawnProtectionFade = 0;
 }
 
-export function playerComponentFactory(entity: Entity, blueprint: ComponentBlueprint) {
-    const comp = entity.add(new PlayerComponent());
-    comp.acceleration = blueprint.getNumber("acceleration", 100);
-    comp.maxSpeed = blueprint.getNumber("maxSpeed", 200);
-    comp.spawnProtection = blueprint.getNumber("spawnProtection", 1);
-    comp.spawnProtectionFade = blueprint.getNumber("spawnProtectionFade", 1);
-    return true;
-}
+export type PlayerConfig = {
+    acceleration: number;
+    maxSpeed: number;
+    spawnProtection: number;
+    spawnProtectionFade: number;
+};
+
+componentFactories.add("Player", (obtain, blueprint) => {
+    const comp = obtain(PlayerComponent);
+    comp.acceleration = blueprint.get("acceleration", 100);
+    comp.maxSpeed = blueprint.get("maxSpeed", 200);
+    comp.spawnProtection = blueprint.get("spawnProtection", 1);
+    comp.spawnProtectionFade = blueprint.get("spawnProtectionFade", 1);
+    return comp;
+});

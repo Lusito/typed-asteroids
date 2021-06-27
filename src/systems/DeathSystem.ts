@@ -1,54 +1,50 @@
-import { Engine, Entity, EntitySystem } from "typed-ecstasy";
-import { SignalConnection } from "typed-signals";
+import { Allocator, Entity, EntitySystem } from "typed-ecstasy";
+import { SignalConnections } from "typed-signals";
+import { Inject, Service } from "typedi";
 
-import { GameEvents } from "../GameEvents";
-import {
-    DeathSpawnsComponent,
-    PositionComponent,
-    PhysicsComponent,
-    PlayerComponent,
-    SoundsComponent,
-    ShieldComponent,
-    VelocityComponent,
-    SpriteComponent,
-} from "../components";
-import { GameData } from "../GameData";
-import { getSound } from "../loader";
+import { GameEvents } from "../services/GameEvents";
+import { GameData } from "../services/GameData";
+import { PositionComponent } from "../components/PositionComponent";
+import { DeathSpawnsComponent } from "../components/DeathSpawnsComponent";
+import { PhysicsComponent } from "../components/PhysicsComponent";
+import { PlayerComponent } from "../components/PlayerComponent";
+import { SoundsComponent } from "../components/SoundsComponent";
+import { ShieldComponent } from "../components/ShieldComponent";
+import { VelocityComponent } from "../components/VelocityComponent";
+import { SpriteComponent } from "../components/SpriteComponent";
+import { AssetLoader } from "../services/AssetLoader";
 
+@Service()
 export class DeathSystem extends EntitySystem {
-    gameData: GameData | null = null;
+    @Inject()
+    private readonly allocator!: Allocator;
 
-    gameEvents: GameEvents | null = null;
+    @Inject()
+    private readonly assets!: AssetLoader;
 
-    deathConnection?: SignalConnection;
+    @Inject()
+    private readonly gameData!: GameData;
 
-    public constructor(priority = 0) {
-        super(priority);
-    }
+    @Inject()
+    private readonly gameEvents!: GameEvents;
+
+    private readonly connections = new SignalConnections();
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    public update() {}
+    public override update() {}
 
-    protected addedToEngine(engine: Engine) {
-        super.addedToEngine(engine);
-        this.gameEvents = engine.lookup.get(GameEvents);
-        if (this.gameEvents) this.deathConnection = this.gameEvents.death.connect(this.killEntity.bind(this));
-        this.gameData = engine.lookup.get(GameData);
+    protected override onEnable() {
+        this.connections.add(this.gameEvents.death.connect(this.killEntity.bind(this)));
     }
 
-    protected removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine);
-        if (this.deathConnection) {
-            this.deathConnection.disconnect();
-            delete this.deathConnection;
-        }
-        this.gameData = null;
+    protected override onDisable() {
+        this.connections.disconnectAll();
     }
 
     private killEntity(entity: Entity) {
         const pc = entity.get(PositionComponent);
         const dsc = entity.get(DeathSpawnsComponent);
-        if (pc && dsc && this.gameEvents) {
+        if (pc && dsc) {
             const phc = entity.get(PhysicsComponent);
             const radius = phc ? phc.radius : 5;
             this.gameEvents.spawnRandomEntities.emit({
@@ -67,13 +63,13 @@ export class DeathSystem extends EntitySystem {
         }
         const plc = entity.get(PlayerComponent);
         const sc = entity.get(SoundsComponent);
-        if (plc && this.gameData && this.gameEvents) {
+        if (plc) {
             this.gameData.lifes--;
             if (this.gameData.lifes > 0) {
-                const shieldComponent = entity.add(new ShieldComponent());
+                const shieldComponent = entity.add(this.allocator.obtainComponent(ShieldComponent));
                 shieldComponent.lifeTime = plc.spawnProtection;
                 this.gameEvents.setStateSpriteVisible.emit(entity, "shield", true);
-                if (sc?.spawn) sc.spawn.play();
+                sc?.spawn?.play();
                 if (pc) {
                     pc.position.set(400, 300);
                     pc.rotation = 0;
@@ -87,12 +83,10 @@ export class DeathSystem extends EntitySystem {
                 if (spc) spc.popTime = spc.popTimeFull;
                 return;
             }
-            if (this.gameEvents) {
-                getSound("lost").play();
-                this.gameEvents.showCenterText.emit("You lost all your lifes, try again.", -1);
-            }
+            this.assets.getSound("lost").play();
+            this.gameEvents.showCenterText.emit("You lost all your lifes, try again.", -1);
         }
-        if (sc?.die) sc.die.play();
+        sc?.die?.play();
         entity.destroy();
     }
 }

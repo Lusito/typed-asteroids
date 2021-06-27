@@ -1,4 +1,5 @@
 import { TextStyle, Container } from "pixi.js";
+import DiContainer from "typedi";
 
 import { Path } from "./Path";
 import { Queue } from "./Queue";
@@ -9,13 +10,16 @@ import { Item } from "./Item";
 import { TextItem } from "./text/TextItem";
 import { SpriteItem } from "./sprite/SpriteItem";
 import { getDefault } from "./sceneAnimatorUtils";
+import { AssetLoader } from "../services/AssetLoader";
 
 export interface SceneAnimatorListener {
     onSceneEnd(): void;
 }
 
 export class SceneAnimator {
-    private readonly container: Container;
+    private readonly container = new Container();
+
+    private readonly assets = DiContainer.get(AssetLoader);
 
     private readonly textStyles: { [s: string]: TextStyle } = {};
 
@@ -32,7 +36,6 @@ export class SceneAnimator {
     private doneTriggered = false;
 
     public constructor(credits: SceneAnimatorJSON, parent: Container) {
-        this.container = new Container();
         parent.addChild(this.container);
         this.timeFactor = credits.timeFactor != null ? credits.timeFactor : 1;
         this.initStyles(credits);
@@ -103,6 +106,7 @@ export class SceneAnimator {
                     oriented = getDefault(itemData, "oriented", false);
                     scale = getDefault(itemData, "scale", 1);
                     item = new SpriteItem(
+                        this.assets,
                         this.container,
                         itemData.type,
                         group,
@@ -118,7 +122,16 @@ export class SceneAnimator {
                     }
                 } else if (itemData.type === "text") {
                     style = this.textStyles[itemData.style];
-                    item = new TextItem(this.container, group, itemStartTime, angle, opacity, itemData.text, style);
+                    item = new TextItem(
+                        this.assets,
+                        this.container,
+                        group,
+                        itemStartTime,
+                        angle,
+                        opacity,
+                        itemData.text,
+                        style
+                    );
 
                     if ("x" in itemData && "y" in itemData) {
                         item.setPosition(itemData.x ?? 0, itemData.y ?? 0);

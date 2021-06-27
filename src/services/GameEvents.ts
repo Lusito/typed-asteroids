@@ -1,8 +1,10 @@
 import { Signal } from "typed-signals";
 import { Entity } from "typed-ecstasy";
+import { Service } from "typedi";
 
-import type { SpawnRandomEntitiesConfig } from "./systems/ItemSpawnSystem";
+import type { SpawnRandomEntitiesConfig } from "../systems/ItemSpawnSystem";
 
+@Service()
 export class GameEvents {
     public readonly gameWon = new Signal<() => any>();
 

@@ -1,13 +1,15 @@
 import { Container } from "pixi.js";
 
+import { AssetLoader } from "../services/AssetLoader";
 import { Vec2, DEG_TO_RAD } from "../Vec2";
 import { Path } from "./Path";
 import type { Animation } from "./SceneAnimatorJSON";
-import { getSound } from "../loader";
 
 const temp = new Vec2();
 
 export abstract class Item {
+    protected readonly assets: AssetLoader;
+
     public group: string;
 
     public path: Path | null = null;
@@ -31,6 +33,7 @@ export abstract class Item {
     private pausePath = 0;
 
     public constructor(
+        assets: AssetLoader,
         parent: Container,
         group: string,
         startTime: number,
@@ -38,6 +41,7 @@ export abstract class Item {
         oriented: boolean,
         opacity: number
     ) {
+        this.assets = assets;
         this.container = new Container();
         this.container.alpha = opacity;
         this.container.rotation = angle * DEG_TO_RAD;
@@ -128,7 +132,7 @@ export abstract class Item {
 
     public startAnimation(animation: Animation) {
         if (animation.type === "sound") {
-            const sound = getSound(animation.resource);
+            const sound = this.assets.getSound(animation.resource);
             if (sound) sound.play();
             return true;
         }
