@@ -28,22 +28,21 @@
     "start": "parcel src/index.html"
   },
   "dependencies": {
-    "@abraham/reflection": "^0.8.0",
+    "@abraham/reflection": "^0.10.0",
     "pixi-sound": "^3.0.5",
-    "pixi.js": "^5.3.10",
+    "pixi.js": "^5.3.12",
     "ts-keycode-enum": "^1.0.6",
-    "typed-ecstasy": "^2.1.0",
-    "typed-signals": "^2.3.0",
+    "typed-ecstasy": "^2.2.0",
+    "typed-signals": "^2.5.0",
     "typedi": "^0.10.0"
   },
   "devDependencies": {
-    "@lusito/eslint-config": "^1.7.0",
-    "@lusito/prettier-config": "^1.7.0",
-    "@lusito/stylelint-config": "^1.6.0",
+    "@lusito/eslint-config": "^2.0.0",
+    "@lusito/prettier-config": "^2.0.0",
     "parcel-bundler": "^1.12.5",
     "parcel-plugin-static-files-copy": "^2.6.0",
     "rimraf": "^3.0.2",
-    "sort-package-json": "^1.51.0",
-    "typescript": "^4.4.3"
+    "sort-package-json": "^1.57.0",
+    "typescript": "^4.7.2"
   }
 }
